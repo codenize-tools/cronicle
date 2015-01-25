@@ -1,10 +1,12 @@
 require 'sourcify'
 require 'sshkit'
 require 'sshkit/dsl'
+require 'tempfile'
 
 module Cronicle; end
 require 'cronicle/ext/hash_ext'
 require 'cronicle/ext/string_ext'
+require 'cronicle/client'
 require 'cronicle/cron_parser'
 require 'cronicle/driver'
 require 'cronicle/dsl'
