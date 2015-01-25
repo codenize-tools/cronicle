@@ -21,6 +21,21 @@ class Cronicle::Exporter
       crontabs_by_host[host.hostname] = crontab_by_user
     end
 
+    parse_crontab(crontabs_by_host)
+  end
+
+  private
+
+  def parse_crontab(crontabs_by_host)
+    crontabs_by_host.each do |host, crontab_by_user|
+      crontab_by_user.keys.each do |user|
+        crontab_by_user[user] = Cronicle::CronParser.parse(
+          crontab_by_user[user],
+          @options.fetch(:libexec)
+        )
+      end
+    end
+
     crontabs_by_host
   end
 end
