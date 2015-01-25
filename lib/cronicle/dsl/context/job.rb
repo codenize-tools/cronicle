@@ -9,25 +9,29 @@ class Cronicle::DSL::Context::Job
     instance_eval(&block)
   end
 
-  def result
-    job = @result[:job]
-    raise %!Job `#{job[:name]}`: :context or block is required! unless job[:context]
-    @result
-  end
+  attr_reader :result
 
   def job(name, opts = {}, &block)
-    raise ArgumentError, %!Job name is required! if (name || '').strip.empty?
-
     name = name.to_s
+
+    raise ArgumentError, %!Job name is required! if (name || '').strip.empty?
 
     unless opts.kind_of?(Hash)
       raise TypeError, "Job `#{name}`: wrong argument type #{opts.class} (expected Hash)"
     end
 
-    opts.assert_valid_keys(:schedule, :content)
+    if opts[:schedule] and not opts[:user]
+      raise ArgumentError, "Job `#{name}`: :user is required when :schedule is passed"
+    elsif not opts[:schedule] and opts[:user]
+      raise ArgumentError, "Job `#{name}`: :schedule is required when :user is passed"
+    end
+
+    opts.assert_valid_keys(:schedule, :user, :content)
 
     if opts[:content] and block
       raise ArgumentError, 'Can not pass :content and block to `job` method'
+    elsif not opts[:content] and not block
+      raise ArgumentError, "Job `#{job[:name]}`: :context or block is required"
     end
 
     job = @result[:job]

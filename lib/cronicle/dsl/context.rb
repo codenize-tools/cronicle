@@ -29,6 +29,10 @@ class Cronicle::DSL::Context
   end
 
   def on(target, &block)
+    unless block
+      raise ArgumentError, "Block is required for `on` method"
+    end
+
     unless target.kind_of?(Hash)
       raise TypeError, "wrong argument type #{target.class} (expected Hash)"
     end
