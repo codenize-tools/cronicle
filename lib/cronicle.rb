@@ -1,5 +1,6 @@
-require 'cronicle/version'
+require 'sshkit'
+require 'sshkit/dsl'
 
-module Cronicle
-  # Your code goes here...
-end
+module Cronicle; end
+require 'cronicle/dsl'
+require 'cronicle/version'
