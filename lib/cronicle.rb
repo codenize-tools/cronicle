@@ -1,4 +1,4 @@
-require "cronicle/version"
+require 'cronicle/version'
 
 module Cronicle
   # Your code goes here...
