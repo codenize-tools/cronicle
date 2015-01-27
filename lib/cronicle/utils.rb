@@ -1,6 +1,9 @@
 class Cronicle::Utils
   class << self
     def regexp_union(list)
+      return nil if list.nil?
+      return list if list.kind_of?(Regexp)
+
       list = [list].flatten.compact
       return nil if list.empty?
 
