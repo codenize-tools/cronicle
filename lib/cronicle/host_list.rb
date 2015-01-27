@@ -1,5 +1,11 @@
 class Cronicle::HostList
-  def initialize(src)
+  def initialize(src, options = {})
+    @hosts = Set.new
+    @host_by_role = Hash.new {|h, k| h[k] = Set.new }
+
+    options.assert_valid_keys(:roles)
+    target_roles = Cronicle::Utils.regexp_union(options[:roles])
+
     begin
       host_list = JSON.parse(src)
     rescue JSON::ParserError
@@ -19,68 +25,66 @@ class Cronicle::HostList
       raise TypeError, "wrong roles type #{roles.class} (expected Hash)"
     end
 
-    @servers = normalize_servers(servers)
-    @roles = normalize_roles(roles)
+    initialize_servers(servers, target_roles)
+    initialize_roles(roles, target_roles)
   end
 
-  def select(target_servers = nil, target_roles = nil)
-    unless target_servers or target_roles
-      return all
-    end
+  def all
+    @hosts.to_a
+  end
+
+  def select(options = {})
+    options.assert_valid_keys(:servers, :roles)
+    target_servers, target_roles = options.values_at(:servers, :roles)
 
     target_servers = Cronicle::Utils.regexp_union(target_servers)
     target_roles = Cronicle::Utils.regexp_union(target_roles)
 
-    hosts = []
+    host_set = Set.new
 
-    @servers.each do |host, roles|
-      if host =~ target_servers or roles.any? {|r| r =~ target_roles }
-        hosts << host
-      end
+    @hosts.each do |host|
+      host_set << host if host =~ target_servers
     end
 
-    @roles.each do |role, hs|
-      if role =~ target_roles
-        hosts.concat(hs)
-      end
+    @host_by_role.each do |role, hosts|
+      host_set.merge(hosts) if role =~ target_roles
     end
 
-    hosts.uniq
-  end
-
-  def all
-    hosts = @servers.keys + @roles.map {|r, hs| hs }.flatten
-    hosts.uniq
+    host_set.to_a
   end
 
   private
 
-  def normalize_servers(servers)
+  def initialize_servers(servers, target_roles)
     unless servers.kind_of?(Hash)
       servers_hash = {}
 
       [servers].flatten.each do |host|
         host = host.to_s.strip
-        servers_hash[host] = {}
+        servers_hash[host] = []
       end
 
       servers = servers_hash
     end
 
-    servers.keys.each do |host|
-      roles = servers[host]
-      servers[host] = [roles].flatten.map {|r| r.to_s }
-    end
+    servers.each do |host, roles|
+      roles = [roles].flatten.map(&:to_s)
 
-    servers
+      if target_roles.nil? or roles.any? {|r| r =~ target_servers }
+        @hosts << host
+        roles.each {|r| @host_by_role[r] << host }
+      end
+    end
   end
 
-  def normalize_roles(roles)
-    roles.keys.each do |role|
-      hosts = roles[role]
-      roles[role] = [hosts].flatten.map {|h| h.to_s }
-    end
+  def initialize_roles(roles, target_roles)
+    roles.each do |role, hosts|
+      hosts = [hosts].flatten.map(&:to_s)
 
-    roles
+      if target_roles.nil? or roles.any? {|r| r =~ target_servers }
+        @hosts.merge(hosts)
+        @host_by_role[role].merge(hosts)
+      end
+    end
   end
 end
