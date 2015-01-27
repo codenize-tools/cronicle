@@ -42,23 +42,8 @@ class Cronicle::DSL::Context
     end
 
     target.assert_valid_keys(:servers, :roles)
-
-    regexp_conv = proc do |key|
-      if target[key]
-        Regexp.union([target[key]].flatten.map {|str_or_reg|
-          if str_or_reg.kind_of?(Regexp)
-            str_or_reg
-          else
-            /\A#{str_or_reg}\z/
-          end
-        })
-      else
-        nil
-      end
-    end
-
-    servers = regexp_conv.call(:servers)
-    roles = regexp_conv.call(:roles)
+    servers = Cronicle::Utils.regexp_union(servers)
+    roles = Cronicle::Utils.regexp_union(roles)
 
     @result << Cronicle::DSL::Context::Job.new(:servers => servers, :roles => roles, &block)
   end
