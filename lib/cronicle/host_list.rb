@@ -60,8 +60,7 @@ class Cronicle::HostList
       servers_hash = {}
 
       [servers].flatten.each do |host|
-        host = host.to_s.strip
-        servers_hash[host] = []
+        servers_hash[host.to_s] = []
       end
 
       servers = servers_hash
