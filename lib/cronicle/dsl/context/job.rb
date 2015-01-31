@@ -38,9 +38,12 @@ class Cronicle::DSL::Context::Job
     job_hash[:schedule] = opts[:schedule].to_s if opts[:schedule]
 
     if block
+      source = block.to_raw_source(:strip_enclosure => true).each_line.to_a
+      source = source.shift + source.join.undent
+
       job_hash[:content] = <<-RUBY
 #!/usr/bin/env ruby
-#{block.to_raw_source(:strip_enclosure => true)}
+#{source}
       RUBY
     else
       job_hash[:content] = opts[:content].to_s.undent

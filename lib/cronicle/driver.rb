@@ -64,4 +64,22 @@ class Cronicle::Driver
 
     crontab_by_user
   end
+
+  def delete_cron_entry(job_path, crontab)
+    sed_cmd = '/' + Cronicle::Utils.sed_escape(job_path) + '/d'
+    sed_cmd = Cronicle::Utils.sh_quote(sed_cmd)
+    sudo(:test, '-e', crontab, '&&', :sed, '-i', sed_cmd, crontab, '||', true) {|cmd| yield(cmd) }
+  end
+
+  def create_temp_entry(job_path, crontab, temp_entry_path, name, schedule)
+    cron_entry = "#{schedule}\\t#{job_path} 2>&1 | logger -t cronicle/#{name}"
+    cron_entry = Cronicle::Utils.sh_quote(cron_entry)
+    sudo(:echo, '-e', cron_entry, '>', temp_entry_path) {|cmd| yield(cmd) }
+  end
+
+  def add_cron_entry(crontab, temp_entry_path)
+    entry_cat = "cat #{temp_entry_path} >> #{crontab}"
+    entry_cat = Cronicle::Utils.sh_quote(entry_cat)
+    sudo(:bash, '-c', entry_cat) {|cmd| yield(cmd) }
+  end
 end

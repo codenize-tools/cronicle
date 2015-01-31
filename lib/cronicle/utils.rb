@@ -15,5 +15,13 @@ class Cronicle::Utils
         end
       })
     end
+
+    def sed_escape(cmd)
+      cmd.gsub('/', '\\/')
+    end
+
+    def sh_quote(str)
+      "'" + str.gsub("'", %!'"'"'!) + "'"
+    end
   end # of class methods
 end
