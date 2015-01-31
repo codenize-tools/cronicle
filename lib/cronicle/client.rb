@@ -4,7 +4,7 @@ class Cronicle::Client
     @options = options
   end
 
-  def apply(file, options = {})
+  def apply(file)
     walk(file)
   end
 
