@@ -37,9 +37,9 @@ class Cronicle::DSL::Context::Job
     job = @result[:job]
 
     if block
-      job[:content] = <<-RUBY.undent
-        #!/usr/bin/env ruby
-        #{block.to_source}.call
+      job[:content] = <<-RUBY
+#!/usr/bin/env ruby
+#{block.to_source}.call
       RUBY
     else
       job[:content] = opts[:content].to_s.undent

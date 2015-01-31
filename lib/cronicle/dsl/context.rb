@@ -45,6 +45,6 @@ class Cronicle::DSL::Context
     servers = Cronicle::Utils.regexp_union(servers)
     roles = Cronicle::Utils.regexp_union(roles)
 
-    @result << Cronicle::DSL::Context::Job.new(:servers => servers, :roles => roles, &block)
+    @result << Cronicle::DSL::Context::Job.new(:servers => servers, :roles => roles, &block).result
   end
 end
