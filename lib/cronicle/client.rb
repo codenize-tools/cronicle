@@ -27,7 +27,26 @@ class Cronicle::Client
 
   def run_jobs(driver, user, jobs)
     # XXX: Run jobs
-    p jobs
+    driver.execute do |host|
+      temp_dir = capture(:mktemp, '-d', '/var/tmp/cronicle.XXXXXXXXXX')
+
+      begin
+        execute(:chmod, 755, temp_dir)
+
+        within(temp_dir) do
+          jobs.each do |name, job|
+            job_path = "#{temp_dir}/#{name}"
+            upload!(StringIO.new(job[:content]), job_path)
+            execute(:chmod, 755, job_path)
+            # XXX:
+            out = driver.sudo(job_path) {|cmd| capture(*cmd).gsub("\r\n", "\n") }
+            puts out
+          end
+        end
+      ensure
+        execute(:rm, '-rf', temp_dir) rescue nil
+      end
+    end
   end
 
   def walk(file)
