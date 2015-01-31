@@ -17,7 +17,7 @@ class Cronicle::Exporter
     @driver.execute do |host|
       cron_dir = drvr.find_cron_dir {|cmd| capture(*cmd) }
       crontabs = drvr.list_crontabs(cron_dir) {|cmd| capture(*cmd) }
-      crontab_by_user = drvr.fetch_crontabs(cron_dir, crontabs) {|cmd| capture(*cmd) }
+      crontab_by_user = drvr.fetch_crontabs(cron_dir, crontabs) {|cmd| capture(*cmd).gsub("\r\n", "\n") }
       crontabs_by_host[host.hostname] = crontab_by_user
     end
 
