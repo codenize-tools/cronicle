@@ -36,7 +36,6 @@ class Cronicle::DSL::Context::Job
 
     job_hash = @result[:job]
     job_hash[:name] = name
-    job_hash[:user] = opts.fetch(:user, 'root').to_s
 
     if block
       job_hash[:content] = <<-RUBY
@@ -47,6 +46,9 @@ class Cronicle::DSL::Context::Job
       job_hash[:content] = opts[:content].to_s.undent
     end
 
-    job_hash[:schedule] = opts[:schedule] if opts[:schedule]
+    if opts[:schedule]
+      job_hash[:schedule] = opts[:schedule]
+      job_hash[:user] = opts.fetch(:user).to_s
+    end
   end
 end

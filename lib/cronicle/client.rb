@@ -29,26 +29,63 @@ class Cronicle::Client
       walk_host(host, jobs_by_user, exported_by_user)
     end
 
+    # XXX: To parallelize
     exported.each do |host, exported_by_user|
-      # XXX: Cleanup jobs
+      run_driver(host) do |driver|
+        delete_job(driver)
+      end
     end
   end
 
   def walk_host(host, jobs_by_user, exported_by_user)
-    jobs_by_user.each do |user, jobs|
-      cron = exported_by_user.delete(user) || {:commands => {}}
-      walk_jobs(host, user, jobs, cron[:commands])
-    end
+    run_driver(host) do |driver|
+      jobs_by_user.each do |user, jobs|
+        cron = exported_by_user.delete(user) || {:commands => {}}
+        walk_jobs(driver, user, jobs, cron[:commands])
+      end
 
-    exported_by_user.each do |user, cron_cmds|
-      # XXX: Cleanup jobs
+      exported_by_user.each do |user, cron|
+        cron_cmds = cron[:commands]
+        delete_job(driver, user)
+      end
     end
   end
 
-  def walk_jobs(host, user, jobs, cron_cmds)
+  def walk_jobs(driver, user, jobs, cron_cmds)
+    jobs.each do |name, job|
+      next unless job[:schedule]
+      current_cmd = cron_cmds.delete(name)
+
+      if current_cmd
+        update_job(driver, user, name, job, current_cmd)
+      else
+        create_job(driver, user, name, job)
+      end
+    end
+
+    cron_cmds.each do |name, current_cmd|
+      delete_job(driver, user, name)
+    end
+  end
+
+  def create_job(driver, user, name, job)
     # XXX:
-    p jobs
-    p cron_cmds
+    p :create_job, name
+  end
+
+  def update_job(driver, user, name, job, current_cmd)
+    # XXX:
+    p :update_job, name
+  end
+
+  def delete_job(driver, user = nil, name = nil)
+    # XXX:
+    p :delete_job, name
+  end
+
+  def run_driver(host)
+    driver = Cronicle::Driver.new([host], @options)
+    yield(driver)
   end
 
   def select_host(jobs)
