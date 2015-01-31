@@ -10,6 +10,7 @@ class Cronicle::Driver
 
   def execute(opts = {}, &block)
     hosts = @coordinator.hosts
+    # XXX: To parallelize
     SSHKit::Runner::Sequential.new(hosts, opts, &block).execute
   end
 

@@ -13,15 +13,20 @@ class Cronicle::Client
   def walk(file)
     jobs = load_file(file)
     jobs_by_host = select_host(jobs)
-    driver = Cronicle::Driver.new(jobs_by_host.keys, @options)
-    exported = Cronicle::Exporter.export(driver, @options)
-    walk_hosts(driver, jobs_by_host, exported)
+    exported = export_cron(jobs_by_host.keys)
+    walk_hosts(jobs_by_host, exported)
   end
 
-  def walk_hosts(driver, jobs_by_host, exported)
+  def export_cron(host_list)
+    driver = Cronicle::Driver.new(host_list, @options)
+    Cronicle::Exporter.export(driver, @options)
+  end
+
+  def walk_hosts(jobs_by_host, exported)
+    # XXX: To parallelize
     jobs_by_host.each do |host, jobs_by_user|
       exported_by_user = exported.delete(host) || {}
-      walk_host(driver, host, jobs_by_user, exported_by_user)
+      walk_host(host, jobs_by_user, exported_by_user)
     end
 
     exported.each do |host, exported_by_user|
@@ -29,10 +34,10 @@ class Cronicle::Client
     end
   end
 
-  def walk_host(driver, host, jobs_by_user, exported_by_user)
+  def walk_host(host, jobs_by_user, exported_by_user)
     jobs_by_user.each do |user, jobs|
       cron = exported_by_user.delete(user) || {:commands => {}}
-      walk_jobs(driver, host, user, jobs, cron[:commands])
+      walk_jobs(host, user, jobs, cron[:commands])
     end
 
     exported_by_user.each do |user, cron_cmds|
@@ -40,7 +45,7 @@ class Cronicle::Client
     end
   end
 
-  def walk_jobs(driver, host, user, jobs, cron_cmds)
+  def walk_jobs(host, user, jobs, cron_cmds)
     # XXX:
     p jobs
     p cron_cmds
