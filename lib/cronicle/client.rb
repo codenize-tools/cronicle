@@ -8,7 +8,27 @@ class Cronicle::Client
     walk(file)
   end
 
+  def run(file, name)
+    name = name.to_s
+    jobs = load_file(file)
+    jobs_by_host = select_host(jobs, name)
+
+    # XXX: To parallelize
+    jobs_by_host.each do |host, jobs_by_user|
+      run_driver(host) do |driver|
+        jobs_by_user.each do |user, jobs|
+          run_jobs(driver, user, jobs)
+        end
+      end
+    end
+  end
+
   private
+
+  def run_jobs(driver, user, jobs)
+    # XXX: Run jobs
+    p jobs
+  end
 
   def walk(file)
     jobs = load_file(file)
@@ -84,11 +104,11 @@ class Cronicle::Client
   end
 
   def run_driver(host)
-    driver = Cronicle::Driver.new([host], @options)
+    driver = Cronicle::Driver.new(Array(host), @options)
     yield(driver)
   end
 
-  def select_host(jobs)
+  def select_host(jobs, target_name = nil)
     hosts = Hash.new do |jobs_by_host, host|
       jobs_by_host[host] = Hash.new do |jobs_by_user, user|
         jobs_by_user[user] = {}
@@ -100,6 +120,10 @@ class Cronicle::Client
       job_user = job_hash[:user]
       job_name = job_hash[:name]
       servers = job[:servers]
+
+      if target_name and job_name != target_name
+        next
+      end
 
       selected_hots = @host_list.select(
         :servers => servers,

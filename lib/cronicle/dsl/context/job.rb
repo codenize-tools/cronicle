@@ -20,10 +20,8 @@ class Cronicle::DSL::Context::Job
       raise TypeError, "Job `#{name}`: wrong argument type #{opts.class} (expected Hash)"
     end
 
-    if opts[:schedule] and not opts[:user]
-      raise ArgumentError, "Job `#{name}`: :user is required when :schedule is passed"
-    elsif not opts[:schedule] and opts[:user]
-      raise ArgumentError, "Job `#{name}`: :schedule is required when :user is passed"
+    unless opts[:user]
+      raise ArgumentError, "Job `#{name}`: :user is required"
     end
 
     opts.assert_valid_keys(:schedule, :user, :content)
@@ -36,6 +34,8 @@ class Cronicle::DSL::Context::Job
 
     job_hash = @result[:job]
     job_hash[:name] = name
+    job_hash[:user] = opts.fetch(:user).to_s
+    job_hash[:schedule] = opts[:schedule].to_s if opts[:schedule]
 
     if block
       job_hash[:content] = <<-RUBY
@@ -44,11 +44,6 @@ class Cronicle::DSL::Context::Job
       RUBY
     else
       job_hash[:content] = opts[:content].to_s.undent
-    end
-
-    if opts[:schedule]
-      job_hash[:schedule] = opts[:schedule]
-      job_hash[:user] = opts.fetch(:user).to_s
     end
   end
 end
