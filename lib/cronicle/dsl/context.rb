@@ -42,9 +42,7 @@ class Cronicle::DSL::Context
     end
 
     target.assert_valid_keys(:servers, :roles)
-    servers = Cronicle::Utils.regexp_union(servers)
-    roles = Cronicle::Utils.regexp_union(roles)
 
-    @result << Cronicle::DSL::Context::Job.new(:servers => servers, :roles => roles, &block).result
+    @result << Cronicle::DSL::Context::Job.new(target, &block).result
   end
 end

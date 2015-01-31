@@ -1,8 +1,8 @@
 class Cronicle::DSL::Context::Job
   def initialize(target, &block)
     @result = {
-      :servers => target[:servers],
-      :roles => target[:roles],
+      :servers => Array(target[:servers]),
+      :roles => Array(target[:roles]),
       :job => {},
     }
 
@@ -31,20 +31,22 @@ class Cronicle::DSL::Context::Job
     if opts[:content] and block
       raise ArgumentError, 'Can not pass :content and block to `job` method'
     elsif not opts[:content] and not block
-      raise ArgumentError, "Job `#{job[:name]}`: :context or block is required"
+      raise ArgumentError, "Job `#{name}`: :context or block is required"
     end
 
-    job = @result[:job]
+    job_hash = @result[:job]
+    job_hash[:name] = name
+    job_hash[:user] = opts.fetch(:user, 'root').to_s
 
     if block
-      job[:content] = <<-RUBY
+      job_hash[:content] = <<-RUBY
 #!/usr/bin/env ruby
-#{block.to_source}.call
+#{block.to_raw_source(:strip_enclosure => true)}
       RUBY
     else
-      job[:content] = opts[:content].to_s.undent
+      job_hash[:content] = opts[:content].to_s.undent
     end
 
-    job[:schedule] = opts[:schedule] if opts[:schedule]
+    job_hash[:schedule] = opts[:schedule] if opts[:schedule]
   end
 end

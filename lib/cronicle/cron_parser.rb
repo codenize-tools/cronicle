@@ -14,7 +14,7 @@ class Cronicle::CronParser
   def initialize(source, libexec)
     @source = source
     @libexec = libexec
-    @commands = []
+    @commands = {}
     @others = ''
   end
 
@@ -31,8 +31,9 @@ class Cronicle::CronParser
       md = line.strip.match(/\A(@\w+|\S+(?:\s+\S+){4})\s+(.\S+)(.*)\z/)
       schedule, command, extra = md.captures if md
 
-      if %r|\A#{Regexp.escape(@libexec)}/| =~ command
-        @commands << {:schedule => schedule, :command => command}
+      if %r|\A#{Regexp.escape(@libexec)}/(.+)| =~ command
+        name = $1
+        @commands[name] = {:schedule => schedule, :command => command}
       else
         @others << line
       end
