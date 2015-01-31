@@ -59,7 +59,7 @@ class Cronicle::HostList
     unless servers.kind_of?(Hash)
       servers_hash = {}
 
-      [servers].flatten.each do |host|
+      Array(servers).each do |host|
         servers_hash[host.to_s] = []
       end
 
@@ -67,7 +67,7 @@ class Cronicle::HostList
     end
 
     servers.each do |host, roles|
-      roles = [roles].flatten.map(&:to_s)
+      roles = Array(roles).map(&:to_s)
 
       if target_roles.nil? or roles.any? {|r| r =~ target_servers }
         @hosts << host
@@ -78,7 +78,7 @@ class Cronicle::HostList
 
   def initialize_roles(roles, target_roles)
     roles.each do |role, hosts|
-      hosts = [hosts].flatten.map(&:to_s)
+      hosts = Array(hosts).map(&:to_s)
 
       if target_roles.nil? or roles.any? {|r| r =~ target_servers }
         @hosts.merge(hosts)

@@ -4,7 +4,7 @@ class Cronicle::Utils
       return nil if list.nil?
       return list if list.kind_of?(Regexp)
 
-      list = [list].flatten.compact
+      list = Array(list).compact
       return nil if list.empty?
 
       Regexp.union(list.map {|str_or_reg|
