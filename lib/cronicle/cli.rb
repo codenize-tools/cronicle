@@ -11,6 +11,8 @@ class Cronicle::CLI < Thor
     :desc => 'Cronicle libexec path'
   class_option 'debug', :type => :boolean, :default => false,
     :desc => 'Debug mode'
+  class_option 'color', :type => :boolean, :default => true,
+    :desc => 'Colorize log'
 
   def initialize(*args)
     super
@@ -18,6 +20,10 @@ class Cronicle::CLI < Thor
 
     if options['debug']
       @logger.set_debug(true)
+    end
+
+    if not $stdin.tty? or not options['color']
+      String.disable_colorization = true
     end
   end
 
