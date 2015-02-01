@@ -47,13 +47,13 @@ class Cronicle::Client
     # XXX: To parallelize
     exported.each do |host, exported_by_user|
       run_driver(host) do |driver|
-        cmds_by_user = Hash.new {|hash, key| hash[key] = []}
+        scripts_by_user = {}
 
-        exported_by_user.each do |user, cron_cmds|
-          cmds_by_user[user] = cron_cmds[:commands]
+        exported_by_user.each do |user, scripts|
+          scripts_by_user[user] = scripts
         end
 
-        driver.delete_job(cmds_by_user)
+        driver.delete_job(scripts_by_user)
       end
     end
   end
@@ -61,13 +61,12 @@ class Cronicle::Client
   def walk_host(host, jobs_by_user, exported_by_user)
     run_driver(host) do |driver|
       jobs_by_user.each do |user, jobs|
-        cron = exported_by_user.delete(user) || {:commands => {}}
-        walk_jobs(driver, user, jobs, cron[:commands])
+        scripts = exported_by_user.delete(user) || {}
+        walk_jobs(driver, user, jobs, scripts)
       end
 
-      exported_by_user.each do |user, cron|
-        cron_cmds = cron[:commands]
-        driver.delete_job(user => cron_cmds)
+      exported_by_user.each do |user, scripts|
+        driver.delete_job(user => scripts)
       end
     end
   end

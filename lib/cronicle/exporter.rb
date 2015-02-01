@@ -51,6 +51,6 @@ class Cronicle::Exporter
       end
     end
 
-    {:commands => scripts}
+    scripts
   end
 end
