@@ -122,7 +122,7 @@ class Cronicle::Driver
 
     self.execute do
       cmds_by_user.each do |user, commands|
-        commands = commands.map {|name, c| c[:command] }
+        commands = commands.map {|name, c| c[:path] }
 
         unless commands.empty?
           # XXX:

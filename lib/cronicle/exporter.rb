@@ -31,7 +31,7 @@ class Cronicle::Exporter
   end
 
   def parse_crontab(crontab, libexec_contents)
-    commands = {}
+    scripts = {}
     libexec_dir = @options.fetch(:libexec)
 
     crontab.each_line.map(&:strip).each do |line|
@@ -43,14 +43,14 @@ class Cronicle::Exporter
       if %r|\A#{Regexp.escape(libexec_dir)}/(?:[^/]+)/(.+)| =~ command
         name = $1
 
-        commands[name] = {
+        scripts[name] = {
           :schedule => schedule,
-          :command => command,
+          :path => command,
           :content => libexec_contents[command]
         }
       end
     end
 
-    {:commands => commands}
+    {:commands => scripts}
   end
 end
