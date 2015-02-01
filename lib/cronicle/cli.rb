@@ -12,6 +12,15 @@ class Cronicle::CLI < Thor
   class_option 'debug', :type => :boolean, :default => false,
     :desc => 'Debug mode'
 
+  def initialize(*args)
+    super
+    @logger = Cronicle::Logger.instance
+
+    if options['debug']
+      @logger.set_debug(true)
+    end
+  end
+
   desc 'exec JOB_NAME', 'Execute a job on remote hosts'
   def exec(job_name)
     with_logging do

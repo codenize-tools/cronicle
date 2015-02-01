@@ -21,6 +21,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'sourcify', '~> 0.6.0.rc4'
   spec.add_dependency 'sshkit', '~> 1.6.1'
   spec.add_dependency 'thor'
+  spec.add_dependency 'colorize'
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rake'
 end

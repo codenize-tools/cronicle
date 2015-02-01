@@ -3,6 +3,8 @@ SSHKit::Backend::Netssh.config.pty = true
 class Cronicle::Driver
   CRON_DIRS = %w(/var/spool/cron/crontabs /var/spool/cron)
 
+  attr_reader :hosts
+
   def initialize(hosts, options = nil)
     @hosts = hosts
     @options = options
@@ -20,6 +22,7 @@ class Cronicle::Driver
   def sudo(*args)
     opts = args.last.kind_of?(Hash) ? args.pop : {}
     sudo_password = @options[:sudo_password] || ''
+    sudo_password = Cronicle::Utils.sh_quote(sudo_password)
     sudo_cmd = [:echo, sudo_password, '|', :sudo, '-S']
     sudo_cmd.concat ['-u', opts[:user]] if opts[:user]
     retval = yield(sudo_cmd + args)
@@ -62,10 +65,15 @@ class Cronicle::Driver
     crontab_by_user
   end
 
+  def find_cron_entry(job_path, crontab)
+    job_path = Cronicle::Utils.sh_quote(job_path)
+    sudo(:fgrep, '-q', job_path, crontab) {|cmd| yield(cmd) }
+  end
+
   def delete_cron_entry(job_path, crontab)
     sed_cmd = '/' + Cronicle::Utils.sed_escape(job_path) + '/d'
     sed_cmd = Cronicle::Utils.sh_quote(sed_cmd)
-    sudo(:sed, '-i', sed_cmd, crontab, :raise_on_non_zero_exit => false) {|cmd| yield(cmd) }
+    sudo(:sed, '-i', sed_cmd, crontab) {|cmd| yield(cmd) }
   end
 
   def create_temp_entry(job_path, crontab, temp_entry_path, name, schedule)
