@@ -63,28 +63,6 @@ class Cronicle::Driver
     end
   end
 
-  def delete_job(cmds_by_user, name = nil)
-    driver = self
-    opts = @options
-
-    self.execute do
-      cmds_by_user.each do |user, commands|
-        commands = commands.map {|name, c| c[:command] }
-
-        unless commands.empty?
-          # XXX:
-          Cronicle::Logger.log(:info, "Delete", opts.merge(:color => :red))
-
-          cron_dir = driver.find_cron_dir {|cmd| capture(*cmd) }
-          crontab = "#{cron_dir}/#{user}"
-          job_path = "#{opts[:libexec]}/#{name}"
-          driver.delete_cron_entry(job_path, crontab) {|cmd| execute(*cmd, :raise_on_non_zero_exit => false) }
-          driver.sudo(:rm, '-f', *commands) {|cmd| execute(*cmd) }
-        end
-      end
-    end
-  end
-
   def create_job(user, name, job)
     create_or_update_job(user, name, job)
   end
@@ -101,14 +79,17 @@ class Cronicle::Driver
       temp_dir = capture(:mktemp, '-d', '/var/tmp/cronicle.XXXXXXXXXX')
 
       begin
+        user_temp_dir = "#{temp_dir}/#{user}"
+        execute(:mkdir, '-p', user_temp_dir)
         cron_dir = driver.find_cron_dir {|cmd| capture(*cmd) }
         crontab = "#{cron_dir}/#{user}"
-        job_path = "#{opts[:libexec]}/#{name}"
-        temp_job_path = "#{temp_dir}/#{name}"
+        user_libexec = "#{opts[:libexec]}/#{user}"
+        job_path = "#{user_libexec}/#{name}"
+        temp_job_path = "#{user_temp_dir}/#{name}"
         temp_entry_path = "#{temp_job_path}.entry"
 
         upload!(StringIO.new(job[:content]), temp_job_path)
-        driver.sudo(:mkdir, '-p', opts[:libexec]) {|cmd| execute(*cmd) }
+        driver.sudo(:mkdir, '-p', user_libexec) {|cmd| execute(*cmd) }
 
         cron_entry_exist = driver.find_cron_entry(job_path, crontab) {|cmd| execute(*cmd, :raise_on_non_zero_exit => false) }
         job_file_exist = execute(:test, '-e', job_path, :raise_on_non_zero_exit => false)
@@ -136,6 +117,28 @@ class Cronicle::Driver
         end
       ensure
         execute(:rm, '-rf', temp_dir) rescue nil
+      end
+    end
+  end
+
+  def delete_job(cmds_by_user, name = nil)
+    driver = self
+    opts = @options
+
+    self.execute do
+      cmds_by_user.each do |user, commands|
+        commands = commands.map {|name, c| c[:command] }
+
+        unless commands.empty?
+          # XXX:
+          Cronicle::Logger.log(:info, "Delete", opts.merge(:color => :red))
+
+          cron_dir = driver.find_cron_dir {|cmd| capture(*cmd) }
+          crontab = "#{cron_dir}/#{user}"
+          job_path = "#{opts[:libexec]}/#{user}/#{name}"
+          driver.delete_cron_entry(job_path, crontab) {|cmd| execute(*cmd, :raise_on_non_zero_exit => false) }
+          driver.sudo(:rm, '-f', *commands) {|cmd| execute(*cmd) }
+        end
       end
     end
   end
