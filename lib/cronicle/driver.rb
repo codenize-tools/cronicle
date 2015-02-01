@@ -10,31 +10,26 @@ class Cronicle::Driver
     @options = options
   end
 
-  def execute(opts = {}, &block)
+  def execute(&block)
     coordinator = SSHKit::Coordinator.new(@hosts)
     hosts = coordinator.hosts
+
+    hosts.each do |host|
+      host.instance_variable_set(:@options, @options)
+    end
+
     # XXX: To parallelize
-    SSHKit::Runner::Sequential.new(hosts, opts, &block).execute
+    runner_opts = @options[:runner_options] || {}
+    SSHKit::Runner::Sequential.new(hosts, runner_opts, &block).execute
   end
 
-  # command #########################################################
-
   def export_crontab
-    driver = self
-    opts = @options
     crontabs_by_host = {}
     libexec_by_host = {}
 
-    self.execute do |host|
-      cron_dir = driver.find_cron_dir {|cmd| capture(*cmd) }
-      crontabs = driver.list_crontabs(cron_dir) {|cmd| capture(*cmd) }
-      crontab_by_user = driver.fetch_crontabs(cron_dir, crontabs) {|cmd| capture(*cmd).gsub("\r\n", "\n") }
-
-      libexec_scripts = capture(:find, opts[:libexec], '-type', :f).each_line.map(&:strip)
-      libexec_contents = driver.fetch_libexec(libexec_scripts) {|cmd| capture(*cmd).gsub("\r\n", "\n") }
-
-      crontabs_by_host[host.hostname] = crontab_by_user
-      libexec_contents[host.hostname] = libexec_contents
+    execute do
+      crontabs_by_host[host.hostname] = fetch_crontabs
+      libexec_by_host[host.hostname] = fetch_libexec_scripts
     end
 
     [crontabs_by_host, libexec_by_host]
