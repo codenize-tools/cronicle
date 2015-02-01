@@ -8,14 +8,38 @@ class Cronicle::CLI < Thor
   class_option 'sudo-password', :aliases => '-p',
     :desc => 'Sudo password'
   class_option 'libexec', :default => '/var/lib/cronicle/libexec',
-    :desc => 'cronicle libexec path'
+    :desc => 'Cronicle libexec path'
+  class_option 'debug', :type => :boolean, :default => false,
+    :desc => 'Debug mode'
 
   desc 'exec JOB_NAME', 'Execute a job on remote hosts'
   def exec(job_name)
-    client.exec(cronfile, job_name)
+    with_logging do
+      client.exec(cronfile, job_name)
+    end
+  end
+
+  desc 'apply', 'Apply cron jobs to remote hosts'
+  def apply
+    with_logging do
+      client.apply(cronfile)
+    end
   end
 
   private
+
+  def with_logging
+    begin
+      yield
+    rescue => e
+      if options['debug']
+        raise e
+      else
+        # XXX:
+        $stderr.puts "[ERROR] #{e.message}"
+      end
+    end
+  end
 
   def client
     Cronicle::Client.new(host_list, client_options)

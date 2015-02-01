@@ -18,20 +18,16 @@ class Cronicle::Driver
 
   def sudo(*args)
     opts = args.last.kind_of?(Hash) ? args.pop : {}
+    sudo_password = @options[:sudo_password] || ''
+    sudo_cmd = [:echo, sudo_password, '|', :sudo, '-S']
+    sudo_cmd.concat ['-u', opts[:user]] if opts[:user]
+    retval = yield(sudo_cmd + args)
 
-    if @options[:sudo_password]
-      sudo_cmd = [:echo, @options[:sudo_password], '|', :sudo, '-S']
-      sudo_cmd.concat ['-u', opts[:user]] if opts[:user]
-      retval = yield(sudo_cmd + args)
-
-      if retval.kind_of?(String)
-        retval.sub!(/\A[^:]*:\s*/, '')
-      end
-
-      retval
-    else
-      yield(args)
+    if retval.kind_of?(String)
+      retval.sub!(/\A[^:]*:\s*/, '')
     end
+
+    retval
   end
 
   def find_cron_dir
