@@ -38,15 +38,15 @@ class Cronicle::Exporter
       next if line =~ /\A#/
 
       md = line.match(/\A(@\w+|\S+(?:\s+\S+){4})\s+(.\S+)(.*)\z/)
-      schedule, command, extra = md.captures if md
+      schedule, path, extra = md.captures if md
 
-      if %r|\A#{Regexp.escape(libexec_dir)}/(?:[^/]+)/(.+)| =~ command
+      if %r|\A#{Regexp.escape(libexec_dir)}/(?:[^/]+)/(.+)| =~ path
         name = $1
 
         scripts[name] = {
           :schedule => schedule,
-          :path => command,
-          :content => libexec_contents[command]
+          :path => path,
+          :content => libexec_contents[path]
         }
       end
     end
