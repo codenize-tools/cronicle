@@ -1,7 +1,7 @@
 class Cronicle::CronParser
   class << self
-    def parse(source, libexec)
-      parser = self.new(source, libexec)
+    def parse(source, libexec_contents, libexec)
+      parser = self.new(source, libexec_contents, libexec)
       parser.parse
 
       {
@@ -11,8 +11,9 @@ class Cronicle::CronParser
     end
   end # of class methods
 
-  def initialize(source, libexec)
+  def initialize(source, libexec_contents, libexec)
     @source = source
+    @libexec_contents = libexec_contents
     @libexec = libexec
     @commands = {}
     @others = ''
@@ -33,7 +34,12 @@ class Cronicle::CronParser
 
       if %r|\A#{Regexp.escape(@libexec)}/(.+)| =~ command
         name = $1
-        @commands[name] = {:schedule => schedule, :command => command}
+
+        @commands[name] = {
+          :schedule => schedule,
+          :command => command,
+          :content => @libexec_contents[command]
+        }
       else
         @others << line
       end

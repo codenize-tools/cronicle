@@ -11,28 +11,26 @@ class Cronicle::Exporter
   end
 
   def export
-    crontabs_by_host = {}
-    drvr = @driver
-
-    @driver.execute do |host|
-      cron_dir = drvr.find_cron_dir {|cmd| capture(*cmd) }
-      crontabs = drvr.list_crontabs(cron_dir) {|cmd| capture(*cmd) }
-      crontab_by_user = drvr.fetch_crontabs(cron_dir, crontabs) {|cmd| capture(*cmd).gsub("\r\n", "\n") }
-      crontabs_by_host[host.hostname] = crontab_by_user
-    end
-
-    parse_crontab(crontabs_by_host)
+    crontabs_by_host, libexec_by_host = @driver.export_crontab
+    parse_crontab(crontabs_by_host, libexec_by_host)
   end
 
   private
 
-  def parse_crontab(crontabs_by_host)
+  def parse_crontab(crontabs_by_host, libexec_by_host)
     crontabs_by_host.each do |host, crontab_by_user|
+      libexec_contents = libexec_by_host[host] || {}
+
       crontab_by_user.keys.each do |user|
-        crontab_by_user[user] = Cronicle::CronParser.parse(
-          crontab_by_user[user],
+        crontab = crontab_by_user[user]
+
+        parsed_crontab = Cronicle::CronParser.parse(
+          crontab,
+          libexec_contents,
           @options.fetch(:libexec)
         )
+
+        crontab_by_user[user] = parsed_crontab
       end
     end
 

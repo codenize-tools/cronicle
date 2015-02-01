@@ -17,6 +17,129 @@ class Cronicle::Driver
     SSHKit::Runner::Sequential.new(hosts, opts, &block).execute
   end
 
+  # command #########################################################
+
+  def export_crontab
+    driver = self
+    opts = @options
+    crontabs_by_host = {}
+    libexec_by_host = {}
+
+    self.execute do |host|
+      cron_dir = driver.find_cron_dir {|cmd| capture(*cmd) }
+      crontabs = driver.list_crontabs(cron_dir) {|cmd| capture(*cmd) }
+      crontab_by_user = driver.fetch_crontabs(cron_dir, crontabs) {|cmd| capture(*cmd).gsub("\r\n", "\n") }
+
+      libexec_scripts = capture(:find, opts[:libexec], '-type', :f).each_line.map(&:strip)
+      libexec_contents = driver.fetch_libexec(libexec_scripts) {|cmd| capture(*cmd).gsub("\r\n", "\n") }
+
+      crontabs_by_host[host.hostname] = crontab_by_user
+      libexec_contents[host.hostname] = libexec_contents
+    end
+
+    [crontabs_by_host, libexec_by_host]
+  end
+
+  def execute_job(user, jobs)
+    driver = self
+
+    self.execute do |host|
+      temp_dir = capture(:mktemp, '-d', '/var/tmp/cronicle.XXXXXXXXXX')
+
+      begin
+        execute(:chmod, 755, temp_dir)
+
+        jobs.each do |name, job|
+          job_path = "#{temp_dir}/#{name}"
+          upload!(StringIO.new(job[:content]), job_path)
+          execute(:chmod, 755, job_path)
+          # XXX:
+          out = driver.sudo(job_path) {|cmd| capture(*cmd).gsub("\r\n", "\n") }
+          puts out
+        end
+      ensure
+        execute(:rm, '-rf', temp_dir) rescue nil
+      end
+    end
+  end
+
+  def delete_job(cmds_by_user, name = nil)
+    driver = self
+    opts = @options
+
+    self.execute do
+      cmds_by_user.each do |user, commands|
+        commands = commands.map {|name, c| c[:command] }
+
+        unless commands.empty?
+          # XXX:
+          Cronicle::Logger.log(:info, "Delete", opts.merge(:color => :red))
+
+          cron_dir = driver.find_cron_dir {|cmd| capture(*cmd) }
+          crontab = "#{cron_dir}/#{user}"
+          job_path = "#{opts[:libexec]}/#{name}"
+          driver.delete_cron_entry(job_path, crontab) {|cmd| execute(*cmd, :raise_on_non_zero_exit => false) }
+          driver.sudo(:rm, '-f', *commands) {|cmd| execute(*cmd) }
+        end
+      end
+    end
+  end
+
+  def create_job(user, name, job)
+    create_or_update_job(user, name, job)
+  end
+
+  def update_job(user, name, job, current_cmd)
+    create_or_update_job(user, name, job, current_cmd)
+  end
+
+  def create_or_update_job(user, name, job, current_cmd = nil)
+    driver = self
+    opts = @options
+
+    self.execute do |host|
+      temp_dir = capture(:mktemp, '-d', '/var/tmp/cronicle.XXXXXXXXXX')
+
+      begin
+        cron_dir = driver.find_cron_dir {|cmd| capture(*cmd) }
+        crontab = "#{cron_dir}/#{user}"
+        job_path = "#{opts[:libexec]}/#{name}"
+        temp_job_path = "#{temp_dir}/#{name}"
+        temp_entry_path = "#{temp_job_path}.entry"
+
+        upload!(StringIO.new(job[:content]), temp_job_path)
+        driver.sudo(:mkdir, '-p', opts[:libexec]) {|cmd| execute(*cmd) }
+
+        cron_entry_exist = driver.find_cron_entry(job_path, crontab) {|cmd| execute(*cmd, :raise_on_non_zero_exit => false) }
+        job_file_exist = execute(:test, '-e', job_path, :raise_on_non_zero_exit => false)
+
+        if job_file_exist
+          delta = capture(:diff, '-u', job_path, temp_job_path, :raise_on_non_zero_exit => false).gsub("\r\n", "\n")
+          delta.strip!
+        end
+
+        if not cron_entry_exist or not job_file_exist or not delta.empty?
+          # XXX:
+          if current_cmd
+            Cronicle::Logger.log(:info, "Update", opts.merge(:color => :green))
+          else
+            Cronicle::Logger.log(:info, "Create", opts.merge(:color => :cyan))
+          end
+
+          driver.sudo(:cp, temp_job_path, job_path) {|cmd| execute(*cmd) }
+          driver.sudo(:chmod, 755, job_path) {|cmd| execute(*cmd) }
+
+          driver.sudo(:touch, crontab) {|cmd| execute(*cmd) }
+          driver.delete_cron_entry(job_path, crontab) {|cmd| execute(*cmd, :raise_on_non_zero_exit => false) }
+          driver.create_temp_entry(job_path, crontab, temp_entry_path, name, job[:schedule]) {|cmd| execute(*cmd) }
+          driver.add_cron_entry(crontab, temp_entry_path) {|cmd| execute(*cmd) }
+        end
+      ensure
+        execute(:rm, '-rf', temp_dir) rescue nil
+      end
+    end
+  end
+
   # command helper ##################################################
 
   def sudo(*args)
@@ -57,12 +180,24 @@ class Cronicle::Driver
     crontab_by_user = {}
 
     crontabs.each do |user|
-      crontab_by_user[user] = sudo(:cat, File.join(cron_dir, user)) do |cmd|
+      crontab = sudo(:cat, File.join(cron_dir, user)) do |cmd|
         yield(cmd)
       end
+
+      crontab_by_user[user] =crontab
     end
 
     crontab_by_user
+  end
+
+  def fetch_libexec(scripts)
+    contents = {}
+
+    scripts.each do |script|
+      contents[script] = yield([:cat, script])
+    end
+
+    contents
   end
 
   def find_cron_entry(job_path, crontab)
