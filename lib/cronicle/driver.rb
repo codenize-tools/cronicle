@@ -4,12 +4,13 @@ class Cronicle::Driver
   CRON_DIRS = %w(/var/spool/cron/crontabs /var/spool/cron)
 
   def initialize(hosts, options = nil)
-    @coordinator = SSHKit::Coordinator.new(hosts)
+    @hosts = hosts
     @options = options
   end
 
   def execute(opts = {}, &block)
-    hosts = @coordinator.hosts
+    coordinator = SSHKit::Coordinator.new(@hosts)
+    hosts = coordinator.hosts
     # XXX: To parallelize
     SSHKit::Runner::Sequential.new(hosts, opts, &block).execute
   end
@@ -64,7 +65,7 @@ class Cronicle::Driver
   def delete_cron_entry(job_path, crontab)
     sed_cmd = '/' + Cronicle::Utils.sed_escape(job_path) + '/d'
     sed_cmd = Cronicle::Utils.sh_quote(sed_cmd)
-    sudo(:test, '-e', crontab, '&&', :sed, '-i', sed_cmd, crontab, '||', true) {|cmd| yield(cmd) }
+    sudo(:sed, '-i', sed_cmd, crontab, :raise_on_non_zero_exit => false) {|cmd| yield(cmd) }
   end
 
   def create_temp_entry(job_path, crontab, temp_entry_path, name, schedule)

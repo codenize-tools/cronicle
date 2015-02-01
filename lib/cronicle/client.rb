@@ -88,7 +88,7 @@ class Cronicle::Client
 
       exported_by_user.each do |user, cron|
         cron_cmds = cron[:commands]
-        delete_job(driver, user => cron_cmds[:commands])
+        delete_job(driver, user => cron_cmds)
       end
     end
   end
@@ -137,12 +137,17 @@ class Cronicle::Client
         upload!(StringIO.new(job[:content]), temp_job_path)
         driver.sudo(:mkdir, '-p', opts[:libexec]) {|cmd| execute(*cmd) }
 
-        delta = capture(:diff, '-u', job_path, temp_job_path, '||', true).gsub("\r\n", "\n")
+        job_file_exist = execute(:test, '-e', job_path, :raise_on_non_zero_exit => false)
+
+        if job_file_exist
+          delta = capture(:diff, '-u', job_path, temp_job_path, :raise_on_non_zero_exit => false).gsub("\r\n", "\n")
+          delta.strip!
+        end
 
         # XXX:
         puts delta
 
-        unless delta.empty?
+        if not job_file_exist or not delta.empty?
           driver.sudo(:cp, temp_job_path, job_path) {|cmd| execute(*cmd) }
           driver.sudo(:chmod, 755, job_path) {|cmd| execute(*cmd) }
 
@@ -164,13 +169,13 @@ class Cronicle::Client
     opts = @options
 
     driver.execute do
-      cmds_by_user.each do |user, commands|
+      cmds_by_user.each do |user, commands|p cmds_by_user
         commands = commands.map {|name, c| c[:command] }
 
         unless commands.empty?
           cron_dir = driver.find_cron_dir {|cmd| capture(*cmd) }
           driver.delete_cron_entry("#{opts[:libexec]}/#{name}", "#{cron_dir}/#{user}") {|cmd| execute(*cmd) }
-          driver.sudo(:rm, *commands, '||', true) {|cmd| execute(*cmd) }
+          driver.sudo(:rm, '-f', *commands) {|cmd| execute(*cmd) }
         end
       end
     end
