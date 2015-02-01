@@ -8,7 +8,7 @@ class Cronicle::Client
     walk(file)
   end
 
-  def run(file, name)
+  def exec(file, name)
     name = name.to_s
     jobs = load_file(file)
     jobs_by_host = select_host(jobs, name)
@@ -49,12 +49,12 @@ class Cronicle::Client
   def walk(file)
     jobs = load_file(file)
     jobs_by_host = select_host(jobs)
-    exported = export_cron
+    exported = export_cron(jobs_by_host.keys)
     walk_hosts(jobs_by_host, exported)
   end
 
-  def export_cron
-    driver = Cronicle::Driver.new(@host_list.all, @options)
+  def export_cron(host_list)
+    driver = Cronicle::Driver.new(host_list, @options)
     Cronicle::Exporter.export(driver, @options)
   end
 
