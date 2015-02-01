@@ -1,5 +1,3 @@
-SSHKit::Backend::Netssh.config.pty = true
-
 class Cronicle::Driver
   CRON_DIRS = %w(/var/spool/cron/crontabs /var/spool/cron)
 
