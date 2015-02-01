@@ -11,7 +11,8 @@ class SSHKit::Backend::Netssh
     with_sudo << '-u' << opts[:user] if opts[:user]
     with_sudo.concat(args)
 
-    retval = send(command, *with_sudo)
+    raise_on_non_zero_exit = opts.fetch(:raise_on_non_zero_exit, true)
+    retval = send(command, *with_sudo, :raise_on_non_zero_exit => raise_on_non_zero_exit)
     retval.sub!(/\A[^:]*:\s*/, '') if retval.kind_of?(String)
     retval
   end
@@ -63,11 +64,37 @@ class SSHKit::Backend::Netssh
     script_contents
   end
 
+  def delete_cron_entry(user, name = nil)
+    cron_dir = find_cron_dir
+    crontab = [cron_dir, user].join('/')
+    script_path = [libexec_dir, user, name].join('/')
+
+    sed_cmd = '/' + Cronicle::Utils.sed_escape(script_path) + '/d'
+    sed_cmd = Cronicle::Utils.sh_quote(sed_cmd)
+
+    sudo(:execute, :sed, '-i', sed_cmd, crontab, :raise_on_non_zero_exit => false)
+  end
+
   def libexec_dir
     host.options.fetch(:libexec)
+  end
+
+  def log_for_cronicle(level, message, opts = {})
+    opts = host.options.merge(opts)
+    Cronicle::Logger.log(level, message, opts)
   end
 end
 
 class SSHKit::Host
   attr_reader :options
+
+  IPADDR_REGEXP = /\A\d+(?:\.\d+){3}\z/
+
+  def short_name
+    if hostname =~ IPADDR_REGEXP
+      hostname
+    else
+      hostname.split('.').first
+    end
+  end
 end

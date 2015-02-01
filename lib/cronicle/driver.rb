@@ -116,23 +116,22 @@ class Cronicle::Driver
     end
   end
 
-  def delete_job(cmds_by_user, name = nil)
+  def delete_job(scripts_by_user, name = nil)
     driver = self
     opts = @options
 
     self.execute do
-      cmds_by_user.each do |user, commands|
-        commands = commands.map {|name, c| c[:path] }
+      scripts_by_user.each do |user, scripts|
+        scripts = scripts.map {|name, script| script[:path] }
 
-        unless commands.empty?
+        unless scripts.empty?
           # XXX:
-          Cronicle::Logger.log(:info, "Delete", opts.merge(:color => :red))
+          log_msg = "Delete: Host `#{host.short_name}` > User `#{user}`"
+          log_msg << " > Job `#{name}`" if name
+          log_for_cronicle(:info, log_msg, :color => :red)
 
-          cron_dir = driver.find_cron_dir {|cmd| capture(*cmd) }
-          crontab = "#{cron_dir}/#{user}"
-          job_path = "#{opts[:libexec]}/#{user}/#{name}"
-          driver.delete_cron_entry(job_path, crontab) {|cmd| execute(*cmd, :raise_on_non_zero_exit => false) }
-          driver.sudo(:rm, '-f', *commands) {|cmd| execute(*cmd) }
+          delete_cron_entry(user, name)
+          sudo(:execute, :rm, '-f', *scripts, :raise_on_non_zero_exit => false)
         end
       end
     end
