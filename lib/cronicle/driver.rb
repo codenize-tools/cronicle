@@ -38,22 +38,15 @@ class Cronicle::Driver
   def execute_job(user, jobs)
     driver = self
 
-    self.execute do |host|
-      temp_dir = capture(:mktemp, '-d', '/var/tmp/cronicle.XXXXXXXXXX')
-
-      begin
-        execute(:chmod, 755, temp_dir)
-
+    execute do
+      mktemp do |temp_dir|
         jobs.each do |name, job|
-          job_path = "#{temp_dir}/#{name}"
-          upload!(StringIO.new(job[:content]), job_path)
-          execute(:chmod, 755, job_path)
-          # XXX:
-          out = driver.sudo(job_path) {|cmd| capture(*cmd).gsub("\r\n", "\n") }
-          puts out
+          upload_script(temp_dir, name, job[:content]) do |temp_script|
+            # XXX:
+            out = crlf_to_lf(sudo(:capture, temp_script))
+            puts out
+          end
         end
-      ensure
-        execute(:rm, '-rf', temp_dir) rescue nil
       end
     end
   end
@@ -75,7 +68,7 @@ class Cronicle::Driver
     driver = self
     opts = @options
 
-    execute do |host|
+    execute do
       mktemp(user) do |temp_dir, user_temp_dir|
         libexec_script = script_path(user, name)
 
@@ -93,7 +86,6 @@ class Cronicle::Driver
           end
 
           sudo(:execute, :cp, temp_script, libexec_script)
-          sudo(:execute, :chmod, 755, libexec_script)
           sudo(:execute, :touch, user_crontab(user))
           delete_cron_entry(user, name)
           add_cron_entry(user, name, job[:schedule], user_temp_dir)

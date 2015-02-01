@@ -87,6 +87,7 @@ class SSHKit::Backend::Netssh
   def upload_script(temp_dir, name, content)
     temp_script = [temp_dir, name].join
     upload!(StringIO.new(content), temp_script)
+    execute(:chmod, 755, temp_script)
     yield(temp_script)
   end
 

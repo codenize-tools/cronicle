@@ -32,6 +32,14 @@ class Cronicle::Logger < ::Logger
     end
   end # of class methods
 
+  # XXX:
+  module Helper
+    def log(level, message, opts = {})
+      opts = (@options || {}).merge(opts)
+      Cronicle::Logger.log(level, message, opts)
+    end
+  end
+
   class SSHKitIO
     def initialize(io = $stdout)
       @io = io
