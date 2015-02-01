@@ -1,5 +1,5 @@
 class Cronicle::CLI < Thor
-  class_option 'file', :aliases => '-f', :default => 'Cronfile',
+  class_option 'file', :aliases => '-f', :default => 'Jobfile',
     :desc => 'Job definition file'
   class_option 'hosts', :aliases => '-h',
     :desc => 'Hosts definition file'
@@ -30,14 +30,14 @@ class Cronicle::CLI < Thor
   desc 'exec JOB_NAME', 'Execute a job on remote hosts'
   def exec(job_name)
     with_logging do
-      client.exec(cronfile, job_name)
+      client.exec(jobfile, job_name)
     end
   end
 
   desc 'apply', 'Apply cron jobs to remote hosts'
   def apply
     with_logging do
-      client.apply(cronfile)
+      client.apply(jobfile)
     end
   end
 
@@ -60,11 +60,11 @@ class Cronicle::CLI < Thor
     Cronicle::Client.new(host_list, client_options)
   end
 
-  def cronfile
+  def jobfile
     file = options['file']
 
     unless File.exist?(file)
-      raise Thor::Error, "No Cronfile found (looking for: #{file})"
+      raise Thor::Error, "No Jobfile found (looking for: #{file})"
     end
 
     file

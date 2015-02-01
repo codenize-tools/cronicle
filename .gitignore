@@ -13,4 +13,4 @@
 *.a
 mkmf.log
 test.rb
-Cronfile
+Jobfile
