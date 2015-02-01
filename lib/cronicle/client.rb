@@ -13,6 +13,10 @@ class Cronicle::Client
     jobs = load_file(file)
     jobs_by_host = select_host(jobs, name)
 
+    if jobs_by_host.empty?
+      raise "Definition cannot be found: Job `#{name}`"
+    end
+
     # XXX: To parallelize
     jobs_by_host.each do |host, jobs_by_user|
       run_driver(host) do |driver|

@@ -65,26 +65,22 @@ class Cronicle::Driver
   end
 
   def create_or_update_job(user, name, job, script = nil)
-    driver = self
-    opts = @options
-
     execute do
+      # XXX:
+      log_msg = "Host `#{host.short_name}` > User `#{user}` > Job `#{name}`"
+
+      if script
+        log_for_cronicle(:info, "Update: #{log_msg}", :color => :green)
+      else
+        log_for_cronicle(:info, "Create: #{log_msg}", :color => :cyan)
+      end
+
       mktemp(user) do |temp_dir, user_temp_dir|
         libexec_script = script_path(user, name)
 
         upload_script(temp_dir, name, job[:content]) do |temp_script|
           temp_entry = temp_script + '.entry'
           sudo(:execute, :mkdir, '-p', user_libexec_dir(user))
-
-          # XXX:
-          log_msg = "Host `#{host.short_name}` > User `#{user}` > Job `#{name}`"
-
-          if script
-            log_for_cronicle(:info, "Update: #{log_msg}", :color => :green)
-          else
-            log_for_cronicle(:info, "Create: #{log_msg}", :color => :cyan)
-          end
-
           sudo(:execute, :cp, temp_script, libexec_script)
           sudo(:execute, :touch, user_crontab(user))
           delete_cron_entry(user, name)

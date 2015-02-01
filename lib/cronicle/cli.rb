@@ -1,4 +1,6 @@
 class Cronicle::CLI < Thor
+  include Cronicle::Logger::Helper
+
   class_option 'file', :aliases => '-f', :default => 'Jobfile',
     :desc => 'Job definition file'
   class_option 'hosts', :aliases => '-h',
@@ -16,10 +18,9 @@ class Cronicle::CLI < Thor
 
   def initialize(*args)
     super
-    @logger = Cronicle::Logger.instance
 
     if options['debug']
-      @logger.set_debug(true)
+      Cronicle::Logger.instance.set_debug(true)
     end
 
     if not $stdin.tty? or not options['color']
@@ -50,8 +51,7 @@ class Cronicle::CLI < Thor
       if options['debug']
         raise e
       else
-        # XXX:
-        $stderr.puts "[ERROR] #{e.message}"
+        log(:error, e.message, :color => :red)
       end
     end
   end
