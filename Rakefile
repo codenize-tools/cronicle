@@ -13,3 +13,9 @@ namespace :vagrant do
     sh 'vagrant destroy -f'
   end
 end
+
+if ENV['TRAVIS']
+  Rake::Task[:spec].enhance(['vagrant:up']) do
+    Rake::Task['vagrant:destroy'].invoke
+  end
+end
