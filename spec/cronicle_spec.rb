@@ -1,13 +1,23 @@
 describe Cronicle do
-  describe_host :amazon_linux do
-    describe package('httpd') do
-      it { should_not be_installed }
+  before do
+    on TARGET_HOSTS do
+      set_crontab :root, <<-CRON.undent
+        FOO=bar
+        ZOO=baz
+        1 1 1 1 1 echo root > /dev/null
+      CRON
     end
   end
 
-  describe_host :ubuntu do
-    describe package('apache2') do
-      it { should_not be_installed }
+  it do
+    on :amazon_linux do
+      puts get_crontab(:root)
+    end
+  end
+
+  it do
+    on :ubuntu do
+      puts get_crontab(:root)
     end
   end
 end
