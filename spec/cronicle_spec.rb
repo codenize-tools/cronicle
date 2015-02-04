@@ -21,16 +21,14 @@ describe Cronicle do
     it do
       on :amazon_linux do
         expect(get_uname).to match /amzn/
-        puts get_crontab('root')
-        puts get_crontab('ec2-user')
+        puts get_crontabs
       end
     end
 
     it do
       on :ubuntu do
         expect(get_uname).to match /Ubuntu/
-        puts get_crontab('root')
-        puts get_crontab('ubuntu')
+        puts get_crontabs
       end
     end
   end

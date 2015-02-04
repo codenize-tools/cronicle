@@ -38,10 +38,14 @@ def set_crontab(user, content)
   end
 end
 
-def get_crontab(user)
+def get_crontabs
   cron_dir = get_cron_dir
-  crontab = [cron_dir, user].join('/')
-  Specinfra.backend.run_command("cat #{crontab}").stdout
+  crontabs = Specinfra.backend.run_command("ls #{cron_dir}/*").stdout.strip.split(/\s+/)
+
+  Hash[*crontabs.map {|crontab|
+    content = Specinfra.backend.run_command("cat #{crontab}").stdout
+    [crontab, content]
+  }.flatten]
 end
 
 def get_uname
