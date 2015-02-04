@@ -44,6 +44,10 @@ def get_crontab(user)
   Specinfra.backend.run_command("cat #{crontab}").stdout
 end
 
+def get_uname
+  Specinfra.backend.run_command('uname -a').stdout.strip
+end
+
 set :backend, :ssh
 set :sudo_password, 'cronicle'
 
@@ -65,9 +69,10 @@ def on(*hosts)
     specinfra_config_set_nil(:scp)
 
     Specinfra.configuration.host = host
-    Specinfra.configuration.ssh_options = SSH_OPTIONS_BY_HOST[host]
+    ssh_options = SSH_OPTIONS_BY_HOST[host]
+    Specinfra.configuration.ssh_options = ssh_options
 
-    yield
+    yield(ssh_options)
   end
 end
 
