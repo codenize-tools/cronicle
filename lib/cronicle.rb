@@ -1,6 +1,7 @@
 require 'colorize'
 require 'json'
 require 'set'
+require 'shellwords'
 require 'singleton'
 require 'sourcify'
 require 'sshkit'

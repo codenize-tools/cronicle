@@ -1,4 +1,28 @@
 describe Cronicle do
+  context 'when empty cron' do
+    let(:jobfile) do
+      <<-RUBY.undent
+        on servers: /.*/ do
+          job :foo, user: :root do
+            puts `uname`
+          end
+        end
+
+        on servers: /.*/ do
+          job :bar, user: :root, content: <<-SH.undent
+            #!/bin/sh
+            echo hello
+          SH
+        end
+      RUBY
+    end
+
+    it do
+      cronicle(:exec, :foo) { jobfile }
+      cronicle(:exec, :bar) { jobfile }
+    end
+  end
+
   context 'when default cron' do
     before do
       on TARGET_HOSTS do |ssh_options|

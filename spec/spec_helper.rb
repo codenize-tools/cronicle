@@ -82,9 +82,62 @@ end
 
 RSpec.configure do |config|
   config.before(:each) do
+    on :ubuntu do
+      Specinfra.backend.run_command("apt-get -y install ruby")
+    end
+  end
+
+  config.before(:each) do
     on TARGET_HOSTS do
       cron_dir = get_cron_dir
       Specinfra.backend.run_command("rm -f #{cron_dir}/*")
     end
+  end
+end
+
+def cronicle(*args)
+  command = args.shift
+  options = args.last.kind_of?(Hash) ? args.pop : {}
+
+  tempfile(`vagrant ssh-config`) do |ssh_config|
+    SSHKit::Backend::Netssh.configure do |ssh|
+      ssh.ssh_options = {:config => ssh_config.path}
+    end
+
+    client = cronicle_client(options)
+
+    tempfile(yield) do |f|
+      args = [command, f.path, args].flatten
+      client.send(*args)
+    end
+  end
+end
+
+def cronicle_client(options = {})
+  options = {
+    :sudo_password => 'cronicle'
+  }.merge(options)
+
+  hosts = SSH_OPTIONS_BY_HOST.keys
+  host_list = Cronicle::HostList.new(hosts.join(','))
+
+  #if ENV['DEBUG'] == '1'
+  #  options[:debug] = true
+  #else
+  #  options[:logger] = Logger.new('/dev/null')
+  #end
+
+  Cronicle::Client.new(host_list, options)
+end
+
+def tempfile(content, options = {})
+  basename = "#{File.basename __FILE__}.#{$$}"
+  basename = [basename, options[:ext]] if options[:ext]
+
+  Tempfile.open(basename) do |f|
+    f.puts(content)
+    f.flush
+    f.rewind
+    yield(f)
   end
 end

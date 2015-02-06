@@ -9,6 +9,10 @@ class Cronicle::CLI < Thor
     :desc => 'Target host role list'
   class_option 'sudo-password', :aliases => '-p',
     :desc => 'Sudo password'
+  class_option 'ssh-config', :default => nil,
+    :desc => 'OpenSSH configuration file'
+  class_option 'connection-timeout', :type => :numeric, :default => nil,
+    :desc => 'SSH connection timeout'
   class_option 'libexec', :default => '/var/lib/cronicle/libexec',
     :desc => 'Cronicle libexec path'
   class_option 'debug', :type => :boolean, :default => false,
@@ -31,6 +35,7 @@ class Cronicle::CLI < Thor
   desc 'exec JOB_NAME', 'Execute a job on remote hosts'
   def exec(job_name)
     with_logging do
+      set_ssh_options
       client.exec(jobfile, job_name)
     end
   end
@@ -38,6 +43,7 @@ class Cronicle::CLI < Thor
   desc 'apply', 'Apply cron jobs to remote hosts'
   def apply
     with_logging do
+      set_ssh_options
       client.apply(jobfile)
     end
   end
@@ -88,5 +94,15 @@ class Cronicle::CLI < Thor
     {
       :roles => options['target-roles']
     }
+  end
+
+  def set_ssh_options
+    conn_timeout = options['connection-timeout']
+    ssh_config = options['ssh-config']
+
+    SSHKit::Backend::Netssh.configure do |ssh|
+      ssh.connection_timeout = conn_timeout if conn_timeout
+      ssh.ssh_options = {:config => ssh_config} if ssh_config
+    end
   end
 end

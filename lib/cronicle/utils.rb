@@ -20,8 +20,8 @@ class Cronicle::Utils
       cmd.gsub('/', '\\/')
     end
 
-    def sh_quote(str)
-      "'" + str.gsub("'", %!'"'"'!) + "'"
+    def remove_prompt!(str)
+      str.sub!(/\A[^:]*:\s*/, '')
     end
   end # of class methods
 end

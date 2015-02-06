@@ -5,7 +5,7 @@ class SSHKit::Backend::Netssh
     opts = args.last.kind_of?(Hash) ? args.pop : {}
 
     password = host.options[:sudo_password] || ''
-    password = Cronicle::Utils.sh_quote(password)
+    password = Shellwords.shellescape(password)
 
     with_sudo = [:echo, password, '|', :sudo, '-S']
     with_sudo << '-u' << opts[:user] if opts[:user]
@@ -13,7 +13,7 @@ class SSHKit::Backend::Netssh
 
     raise_on_non_zero_exit = opts.fetch(:raise_on_non_zero_exit, true)
     retval = send(command, *with_sudo, :raise_on_non_zero_exit => raise_on_non_zero_exit)
-    retval.sub!(/\A[^:]*:\s*/, '') if retval.kind_of?(String)
+    Cronicle::Utils.remove_prompt!(retval) if retval.kind_of?(String)
     retval
   end
 
@@ -66,7 +66,7 @@ class SSHKit::Backend::Netssh
 
   def delete_cron_entry(user, name = nil)
     sed_cmd = '/' + Cronicle::Utils.sed_escape(script_path(user, name)) + '/d'
-    sed_cmd = Cronicle::Utils.sh_quote(sed_cmd)
+    sed_cmd = Shellwords.shellescape(sed_cmd)
 
     sudo(:execute, :sed, '-i', sed_cmd, user_crontab(user), :raise_on_non_zero_exit => false)
   end
@@ -76,11 +76,11 @@ class SSHKit::Backend::Netssh
     temp_entry = [temp_dir, name + '.entry'].join('/')
 
     cron_entry = "#{schedule}\\t#{script} 2>&1 | logger -t cronicle/#{user}/#{name}"
-    cron_entry = Cronicle::Utils.sh_quote(cron_entry)
+    cron_entry = Shellwords.shellescape(cron_entry)
     sudo(:execute, :echo, '-e', cron_entry, '>', temp_entry)
 
     entry_cat = "cat #{temp_entry} >> #{user_crontab(user)}"
-    entry_cat = Cronicle::Utils.sh_quote(entry_cat)
+    entry_cat = Shellwords.shellescape(entry_cat)
     sudo(:execute, :bash, '-c', entry_cat)
   end
 

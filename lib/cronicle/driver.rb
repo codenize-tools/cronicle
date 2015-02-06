@@ -41,7 +41,9 @@ class Cronicle::Driver
         jobs.each do |name, job|
           upload_script(temp_dir, name, job[:content]) do |temp_script|
             # XXX:
-            out = crlf_to_lf(sudo(:capture, temp_script))
+            command = sudo(:_execute, temp_script, :raise_on_non_zero_exit => false)
+            out = command.full_stdout
+            Cronicle::Utils.remove_prompt!(out)
             puts out
           end
         end
