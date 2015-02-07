@@ -33,7 +33,8 @@ class SSHKit::Backend::Netssh
 
   def list_crontabs
     cron_dir = find_cron_dir
-    @crontab_list ||= sudo(:capture, :find, cron_dir, '-type', :f, '-maxdepth', 1).each_line.map(&:strip)
+    @crontab_list ||= sudo(:capture, :find, cron_dir, '-type', :f, '-maxdepth', 1, '2> /dev/null',
+                        :raise_on_non_zero_exit => false).each_line.map(&:strip)
   end
 
   def fetch_crontabs
@@ -51,7 +52,8 @@ class SSHKit::Backend::Netssh
   end
 
   def list_libexec_scripts
-    @libexec_scripts ||= capture(:find, libexec_dir, '-type', :f).each_line.map(&:strip)
+    @libexec_scripts ||= capture(:find, libexec_dir, '-type', :f, '2> /dev/null',
+                           :raise_on_non_zero_exit => false).each_line.map(&:strip)
   end
 
   def fetch_libexec_scripts
