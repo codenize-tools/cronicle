@@ -1,4 +1,6 @@
 class Cronicle::Client
+  include Cronicle::Logger::Helper
+
   def initialize(host_list, options = {})
     @host_list = host_list
     @options = options
@@ -16,6 +18,8 @@ class Cronicle::Client
     if jobs_by_host.empty?
       raise "Definition cannot be found: Job `#{name}`"
     end
+
+    log(:info, "Exec `%s` on %s" % [name, jobs_by_host.keys.join(', ')], :color => :cyan)
 
     # XXX: To parallelize
     jobs_by_host.each do |host, jobs_by_user|

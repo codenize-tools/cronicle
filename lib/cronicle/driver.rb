@@ -36,15 +36,27 @@ class Cronicle::Driver
   def execute_job(user, jobs)
     driver = self
 
-    execute do
+    execute do |host|
       mktemp do |temp_dir|
         jobs.each do |name, job|
           upload_script(temp_dir, name, job[:content]) do |temp_script|
-            # XXX:
             command = sudo(:_execute, temp_script, :raise_on_non_zero_exit => false)
             out = command.full_stdout
             Cronicle::Utils.remove_prompt!(out)
-            puts out
+
+            put_log = proc do |level, opts|
+              opts ||= {}
+
+              out.each_line do |line|
+                log_for_cronicle(:info, line.strip, opts.merge(:host => host.short_name))
+              end
+            end
+
+            if command.exit_status.zero?
+              put_log.call(:info)
+            else
+              put_log.call(:error, :color => :red)
+            end
           end
         end
       end

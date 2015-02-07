@@ -23,7 +23,8 @@ class Cronicle::Logger < ::Logger
 
   class << self
     def log(level, message, opts = {})
-      message = "[#{level.to_s.upcase}] #{message}" unless level == :info
+      message = "#{level.to_s.downcase}: #{message}" unless level == :info
+      message = "[#{opts[:host]}] #{message}" if opts[:host]
       message << ' (dry-run)' if opts[:dry_run]
       message = message.send(opts[:color]) if opts[:color]
 

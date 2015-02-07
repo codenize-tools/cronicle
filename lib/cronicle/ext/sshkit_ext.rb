@@ -143,13 +143,7 @@ end
 class SSHKit::Host
   attr_reader :options
 
-  IPADDR_REGEXP = /\A\d+(?:\.\d+){3}\z/
-
   def short_name
-    if hostname =~ IPADDR_REGEXP
-      hostname
-    else
-      hostname.split('.').first
-    end
+    Cronicle::Utils.short_hostname(hostname)
   end
 end

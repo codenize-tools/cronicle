@@ -16,6 +16,16 @@ class Cronicle::Utils
       })
     end
 
+    IPADDR_REGEXP = /\A\d+(?:\.\d+){3}\z/
+
+    def short_hostname(hostname)
+      if hostname =~ IPADDR_REGEXP
+        hostname
+      else
+        hostname.split('.').first
+      end
+    end
+
     def sed_escape(cmd)
       cmd.gsub('/', '\\/')
     end
