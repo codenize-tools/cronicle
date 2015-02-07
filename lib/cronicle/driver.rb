@@ -18,7 +18,7 @@ class Cronicle::Driver
 
     runner_opts = @options[:runner_options] || {}
     runner = SSHKit::Runner::Group.new(hosts, runner_opts, &block)
-    runner.group_size = @options[:concurrency] if @options[:concurrency]
+    runner.group_size = @options[:concurrency]
     runner.execute
   end
 

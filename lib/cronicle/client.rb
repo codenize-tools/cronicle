@@ -3,7 +3,9 @@ class Cronicle::Client
 
   def initialize(host_list, options = {})
     @host_list = host_list
-    @options = options
+    @options = {
+      :concurrency => 10
+    }.merge(options)
   end
 
   def apply(file)
@@ -21,8 +23,7 @@ class Cronicle::Client
 
     log(:info, "Exec `%s` on %s" % [name, jobs_by_host.keys.join(', ')], :color => :cyan)
 
-    # XXX: To parallelize
-    jobs_by_host.each do |host, jobs_by_user|
+    parallel_each(jobs_by_host) do |host, jobs_by_user|
       run_driver(host) do |driver|
         jobs_by_user.each do |user, jobs|
           driver.execute_job(user, jobs)
@@ -46,14 +47,12 @@ class Cronicle::Client
   end
 
   def walk_hosts(jobs_by_host, exported)
-    # XXX: To parallelize
-    jobs_by_host.each do |host, jobs_by_user|
+    parallel_each(jobs_by_host) do |host, jobs_by_user|
       exported_by_user = exported.delete(host) || {}
       walk_host(host, jobs_by_user, exported_by_user)
     end
 
-    # XXX: To parallelize
-    exported.each do |host, exported_by_user|
+    parallel_each(exported) do |host, exported_by_user|
       run_driver(host) do |driver|
         scripts_by_user = {}
 
@@ -150,5 +149,9 @@ class Cronicle::Client
     else
       raise TypeError, "Can not convert #{file} into File"
     end
+  end
+
+  def parallel_each(enum, &block)
+    Parallel.each(enum, :in_threads => @options[:concurrency], &block)
   end
 end

@@ -1,5 +1,6 @@
 require 'colorize'
 require 'json'
+require 'parallel'
 require 'set'
 require 'shellwords'
 require 'singleton'
