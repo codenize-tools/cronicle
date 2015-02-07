@@ -16,9 +16,10 @@ class Cronicle::Driver
       host.instance_variable_set(:@options, @options)
     end
 
-    # XXX: To parallelize
     runner_opts = @options[:runner_options] || {}
-    SSHKit::Runner::Sequential.new(hosts, runner_opts, &block).execute
+    runner = SSHKit::Runner::Group.new(hosts, runner_opts, &block)
+    runner.group_size = @options[:concurrency] if @options[:concurrency]
+    runner.execute
   end
 
   def export_crontab

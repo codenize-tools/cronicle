@@ -13,6 +13,8 @@ class Cronicle::CLI < Thor
     :desc => 'OpenSSH configuration file'
   class_option 'connection-timeout', :type => :numeric, :default => nil,
     :desc => 'SSH connection timeout'
+  class_option 'concurrency', :type => :numeric, :default => 10,
+    :desc => 'SSH concurrency'
   class_option 'libexec', :default => '/var/lib/cronicle/libexec',
     :desc => 'Cronicle libexec path'
   class_option 'debug', :type => :boolean, :default => false,
@@ -86,6 +88,7 @@ class Cronicle::CLI < Thor
   def client_options
     {
       :sudo_password => options['sudo-password'],
+      :concurrency => options['concurrency'],
       :libexec => options['libexec']
     }
   end
