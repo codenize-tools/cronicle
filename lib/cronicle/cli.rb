@@ -1,26 +1,16 @@
 class Cronicle::CLI < Thor
   include Cronicle::Logger::Helper
 
-  class_option 'file', :aliases => '-f', :default => 'Jobfile',
-    :desc => 'Job definition file'
-  class_option 'hosts', :aliases => '-h',
-    :desc => 'Hosts definition file'
-  class_option 'target-roles', :aliases => '-r', :type => :array,
-    :desc => 'Target host role list'
-  class_option 'sudo-password', :aliases => '-p',
-    :desc => 'Sudo password'
-  class_option 'ssh-config', :default => nil,
-    :desc => 'OpenSSH configuration file'
-  class_option 'connection-timeout', :type => :numeric, :default => nil,
-    :desc => 'SSH connection timeout'
-  class_option 'concurrency', :type => :numeric, :default => 10,
-    :desc => 'SSH concurrency'
-  class_option 'libexec', :default => '/var/lib/cronicle/libexec',
-    :desc => 'Cronicle libexec path'
-  class_option 'debug', :type => :boolean, :default => false,
-    :desc => 'Debug mode'
-  class_option 'color', :type => :boolean, :default => true,
-    :desc => 'Colorize log'
+  class_option 'file',               :aliases => '-f', :desc => 'Job definition file',        :default => 'Jobfile'
+  class_option 'hosts',              :aliases => '-h', :desc => 'Hosts definition file'
+  class_option 'target-roles',       :aliases => '-r', :desc => 'Target host role list',      :type => :array
+  class_option 'sudo-password',      :aliases => '-p', :desc => 'Sudo password'
+  class_option 'ssh-config',                           :desc => 'OpenSSH configuration file', :default => nil
+  class_option 'connection-timeout',                   :desc => 'SSH connection timeout',     :type => :numeric, :default => nil
+  class_option 'concurrency',                          :desc => 'SSH concurrency',            :type => :numeric, :default => 10
+  class_option 'libexec',                              :desc => 'Cronicle libexec path',      :default => '/var/lib/cronicle/libexec'
+  class_option 'debug',                                :desc => 'Debug mode',                 :type => :boolean, :default => false
+  class_option 'color',                                :desc => 'Colorize log',               :type => :boolean, :default => true
 
   def initialize(*args)
     super
