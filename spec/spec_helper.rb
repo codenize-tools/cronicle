@@ -4,6 +4,8 @@ require 'tempfile'
 
 require 'cronicle'
 
+String.disable_colorization = true
+
 def get_ssh_config(host)
   Tempfile.open('', Dir.tmpdir) do |config|
     config.write(`vagrant ssh-config #{host}`)
@@ -121,11 +123,11 @@ def cronicle_client(options = {})
   hosts = SSH_OPTIONS_BY_HOST.keys
   host_list = Cronicle::HostList.new(hosts.join(','))
 
-  #if ENV['DEBUG'] == '1'
-  #  options[:debug] = true
-  #else
-  #  options[:logger] = Logger.new('/dev/null')
-  #end
+  if ENV['DEBUG'] == '1'
+    options[:debug] = true
+  else
+    options[:logger] ||= Logger.new('/dev/null')
+  end
 
   Cronicle::Client.new(host_list, options)
 end

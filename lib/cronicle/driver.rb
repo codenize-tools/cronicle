@@ -54,7 +54,7 @@ class Cronicle::Driver
           end
 
           upload_script(temp_dir, name, job[:content]) do |temp_script|
-            command = sudo(:_execute, temp_script, :raise_on_non_zero_exit => false)
+            command = sudo(:_execute, temp_script, :user => user, :raise_on_non_zero_exit => false)
             out = command.full_stdout
             Cronicle::Utils.remove_prompt!(out)
             host_user_job = {:host => host.hostname, :user => user, :job => name}
