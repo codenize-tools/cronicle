@@ -3,6 +3,8 @@ rvm:
 - 2.0.0
 before_install:
 - openssl aes-256-cbc -K $encrypted_3e901e83a832_key -iv $encrypted_3e901e83a832_iv
+  -in cronicle.us-east-1.pem.enc -out cronicle.us-east-1.pem -d
+- openssl aes-256-cbc -K $encrypted_3e901e83a832_key -iv $encrypted_3e901e83a832_iv
   -in cronicle.pem.enc -out cronicle.pem -d
 install:
 - wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.7.2_x86_64.deb
@@ -20,4 +22,4 @@ env:
   - secure: CdUw5RJ8GXVCD5Orr+hP7tscfE1rNFyz2bnIqWj8jLCnxcLY7TqcV9v1z130uuU+keAyzAFIOPu1GHrr83Sgyo2MIwQkYfA52K1gB5ThzZXZQDSvGKJk3mtfvRkxJVmUxeCEZVC9QXKqR5WW15Cj7wBG4Y6dClty3zwyH7MtPI8=
   - secure: gR/fjFSW81OtcnI8lQREfwj/EeW0YOsXOTUpZCPRdWaaIKGYmjB+6H+KgPcw1nGy+kknb5HXyOTLTSKOngC6WW1EaeKYzKqKGn8xlFGpFMmLCVXyDJG85ABr8jC768AltbYPYuUYb0JgX2PEMH1NNbCVaQqh8oUlBOjMrMqCbzk=
   - EC2_KEYPAIR_NAME=cronicle
-  - EC2_PRIVATE_KEY_PATH=cronicle.pem
+  - EC2_PRIVATE_KEY_PATH=cronicle.us-east-1.pem.enc
