@@ -6,7 +6,7 @@ task :default => :spec
 
 namespace :vagrant do
   task :up do
-    sh 'vagrant up'
+    sh 'vagrant up --provider=aws'
   end
 
   task :destroy do
