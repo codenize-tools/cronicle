@@ -53,7 +53,7 @@ Options:
 ```sh
 $ cat Jobfile
 on servers: :your_hostname do
-  job :my_job, user: 'ec2-user', schedule: "* * * * *" do
+  job :my_job, user: "ec2-user", schedule: "* * * * *" do
     puts "hello"
   end
 end
@@ -104,4 +104,24 @@ server2
     "db": ["server2"]
   }
 }
+```
+
+Hosts definition file is not required.
+
+If you pass `--hosts` options, can be defined as follows in Jobfile:
+
+```ruby
+on servers: /any_host/ do # use regexp
+  job :foo, user: "ec2-user", schedule: "* * * * *" do
+    3.times do
+      puts "hello"
+    end
+  end
+end
+
+on roles: "web" do # use role
+  job :my_job, user: "ec2-user", schedule: "* * * * *" do
+    puts "hello"
+  end
+end
 ```
