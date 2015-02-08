@@ -144,8 +144,4 @@ end
 
 class SSHKit::Host
   attr_reader :options
-
-  def short_name
-    Cronicle::Utils.short_hostname(hostname)
-  end
 end

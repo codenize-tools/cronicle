@@ -38,16 +38,19 @@ class Cronicle::Driver
     execute do
       mktemp do |temp_dir|
         jobs.each do |name, job|
+          log_for_cronicle(:info, 'Execute job', :color => :cyan, :host => host.hostname, :user => user, :job => name)
+
           upload_script(temp_dir, name, job[:content]) do |temp_script|
             command = sudo(:_execute, temp_script, :raise_on_non_zero_exit => false)
             out = command.full_stdout
             Cronicle::Utils.remove_prompt!(out)
+            host_user_job = {:host => host.hostname, :user => user, :job => name}
 
             put_log = proc do |level, opts|
               opts ||= {}
 
               out.each_line do |line|
-                log_for_cronicle(:info, line.strip, opts.merge(:host => host.short_name))
+                log_for_cronicle(:info, line.strip, opts.merge(host_user_job))
               end
             end
 
@@ -120,12 +123,16 @@ class Cronicle::Driver
   end
 
   def test_sudo
-    result = false
+    ok = false
 
     execute do
-      result = sudo(:execute, :echo, :raise_on_non_zero_exit => false)
+      ok = sudo(:execute, :echo, :raise_on_non_zero_exit => false)
+
+      unless ok
+        log_for_cronicle(:error, 'incorrect sudo password', :color => :red, :host => host.hostname)
+      end
     end
 
-    result
+    ok
   end
 end
