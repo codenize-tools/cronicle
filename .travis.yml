@@ -12,7 +12,7 @@ before_script:
 - vagrant up --provider=aws
 script:
 - bundle install
-- bundle exec rake vagrant:up
+- bundle exec rake
 after_script:
 - vagrant destroy -f
 env:
