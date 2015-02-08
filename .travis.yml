@@ -7,11 +7,14 @@ before_install:
 install:
 - wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.7.2_x86_64.deb
 - sudo dpkg -i vagrant_1.7.2_x86_64.deb
+before_script:
+- vagrant plugin install vagrant-aws
+- vagrant up --provider=aws
 script:
 - bundle install
 - bundle exec rake vagrant:up
 after_script:
-- bundle exec rake vagrant:destroy
+- vagrant destroy -f
 env:
   global:
   - secure: CdUw5RJ8GXVCD5Orr+hP7tscfE1rNFyz2bnIqWj8jLCnxcLY7TqcV9v1z130uuU+keAyzAFIOPu1GHrr83Sgyo2MIwQkYfA52K1gB5ThzZXZQDSvGKJk3mtfvRkxJVmUxeCEZVC9QXKqR5WW15Cj7wBG4Y6dClty3zwyH7MtPI8=
