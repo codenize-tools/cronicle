@@ -13,7 +13,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       aws.access_key_id = ENV["AWS_ACCESS_KEY_ID"]
       aws.secret_access_key = ENV["AWS_SECRET_ACCESS_KEY"]
       aws.keypair_name = ENV["EC2_KEYPAIR_NAME"]
-      aws.instance_type = "t1.micro"
+      aws.instance_type = "m1.large"
       aws.region = "ap-northeast-1"
       aws.terminate_on_shutdown = true
       aws.ami = "ami-3c87993d"
@@ -36,7 +36,7 @@ echo 'ec2-user ALL=(ALL) ALL' > /etc/sudoers.d/cloud-init
       aws.access_key_id = ENV["AWS_ACCESS_KEY_ID"]
       aws.secret_access_key = ENV["AWS_SECRET_ACCESS_KEY"]
       aws.keypair_name = ENV["EC2_KEYPAIR_NAME"]
-      aws.instance_type = "t1.micro"
+      aws.instance_type = "m1.large"
       aws.region = "ap-northeast-1"
       aws.terminate_on_shutdown = true
       aws.ami = "ami-18b6aa19"
