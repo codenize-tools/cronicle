@@ -16,3 +16,4 @@ test.rb
 Jobfile
 /.vagrant
 *.pem
+*.bak
