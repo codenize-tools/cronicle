@@ -50,7 +50,7 @@ Options:
 
 ## Quick Start
 
-```sh
+```
 $ cat Jobfile
 on servers: :your_hostname do
   job :my_job, user: "ec2-user", schedule: "* * * * *" do
