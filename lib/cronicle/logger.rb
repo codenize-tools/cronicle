@@ -24,9 +24,23 @@ class Cronicle::Logger < ::Logger
   class << self
     def log(level, message, opts = {})
       message = "#{level.to_s.downcase}: #{message}" unless level == :info
-      message = "[#{opts[:host]}] #{message}" if opts[:host]
       message << ' (dry-run)' if opts[:dry_run]
       message = message.send(opts[:color]) if opts[:color]
+
+      host_user_job = []
+
+      [:host, :user, :job].each do |key|
+        next unless opts[key]
+        value = opts[key]
+        value = Cronicle::Utils.short_hostname(value) if key == :host
+        host_user_job << value
+      end
+
+      unless host_user_job.empty?
+        job_info = host_user_job.join('/') + '>'
+        job_info = job_info.light_black
+        message = "#{job_info} #{message}"
+      end
 
       logger = opts[:logger] || Cronicle::Logger.instance
       logger.send(level, message)

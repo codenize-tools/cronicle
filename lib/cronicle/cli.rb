@@ -5,6 +5,7 @@ class Cronicle::CLI < Thor
   class_option 'hosts',              :aliases => '-h', :desc => 'Hosts definition file'
   class_option 'target-roles',       :aliases => '-r', :desc => 'Target host role list',      :type => :array
   class_option 'sudo-password',      :aliases => '-p', :desc => 'Sudo password'
+  class_option 'dry-run',                              :desc => 'Do not actually change',     :type => :boolean, :default => false
   class_option 'ssh-config',                           :desc => 'OpenSSH configuration file', :default => nil
   class_option 'connection-timeout',                   :desc => 'SSH connection timeout',     :type => :numeric, :default => nil
   class_option 'concurrency',                          :desc => 'SSH concurrency',            :type => :numeric, :default => 10
@@ -33,7 +34,6 @@ class Cronicle::CLI < Thor
   end
 
   desc 'apply', 'Apply cron jobs to remote hosts'
-  option 'dry-run', :desc => 'Do not actually change', :type => :boolean, :default => false
   def apply
     with_logging do
       set_ssh_options

@@ -33,5 +33,11 @@ class Cronicle::Utils
     def remove_prompt!(str)
       str.sub!(/\A[^:]*:\s*/, '')
     end
+
+    def diff(file1, file2)
+      file1 = file1.chomp + "\n"
+      file2 = file2.chomp + "\n"
+      Diffy::Diff.new(file1, file2).to_s(:text)
+    end
   end # of class methods
 end

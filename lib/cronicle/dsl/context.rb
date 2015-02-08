@@ -43,6 +43,6 @@ class Cronicle::DSL::Context
 
     target.assert_valid_keys(:servers, :roles)
 
-    @result << Cronicle::DSL::Context::Job.new(target, &block).result
+    @result.concat(Cronicle::DSL::Context::Job.new(target, &block).result.values)
   end
 end

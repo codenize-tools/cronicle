@@ -1,9 +1,11 @@
 class Cronicle::DSL::Context::Job
   def initialize(target, &block)
-    @result = {
-      :servers => Array(target[:servers]),
-      :roles => Array(target[:roles]),
-      :job => {},
+    @result = Hash.new {|hash, key|
+      hash[key] = {
+        :servers => Array(target[:servers]),
+        :roles => Array(target[:roles]),
+        :job => {}
+      }
     }
 
     instance_eval(&block)
@@ -15,6 +17,10 @@ class Cronicle::DSL::Context::Job
     name = name.to_s
 
     raise ArgumentError, %!Job name is required! if (name || '').strip.empty?
+
+    if @result.has_key?(name)
+      raise "Job `#{name}`: already defined"
+    end
 
     unless opts.kind_of?(Hash)
       raise TypeError, "Job `#{name}`: wrong argument type #{opts.class} (expected Hash)"
@@ -32,7 +38,7 @@ class Cronicle::DSL::Context::Job
       raise ArgumentError, "Job `#{name}`: :context or block is required"
     end
 
-    job_hash = @result[:job]
+    job_hash = @result[name][:job]
     job_hash[:name] = name
     job_hash[:user] = opts.fetch(:user).to_s
     job_hash[:schedule] = opts[:schedule].to_s if opts[:schedule]

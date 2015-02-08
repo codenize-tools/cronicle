@@ -3,6 +3,7 @@ class Cronicle::Client
 
   def initialize(host_list, options = {})
     @host_list = host_list
+
     @options = {
       :concurrency => 10
     }.merge(options)
@@ -20,8 +21,6 @@ class Cronicle::Client
     if jobs_by_host.empty?
       raise "Definition cannot be found: Job `#{name}`"
     end
-
-    log(:info, "Exec `%s` on %s" % [name, jobs_by_host.keys.join(', ')], :color => :cyan)
 
     parallel_each(jobs_by_host) do |host, jobs_by_user|
       run_driver(host) do |driver|
@@ -100,8 +99,6 @@ class Cronicle::Client
 
     if driver.test_sudo
       yield(driver)
-    else
-      log(:error, 'Incorrect sudo password', :color => :red, :host => Cronicle::Utils.short_hostname(host))
     end
   end
 
@@ -134,10 +131,10 @@ class Cronicle::Client
 
       (selected_hots + dsl_hosts).uniq.each do |h|
         if hosts[h][job_user][job_name]
-          raise "`Host #{h}` > User `#{user}` > Job `#{job_name}`: already defined"
+          log(:warn, "Job is duplicated", :color => :yellow, :host => h, :user => job_user, :job => job_name)
+        else
+          hosts[h][job_user][job_name] = job_hash
         end
-
-        hosts[h][job_user][job_name] = job_hash
       end
     end
 
@@ -152,7 +149,7 @@ class Cronicle::Client
     elsif [File, Tempfile].any? {|i| file.kind_of?(i) }
       Cronicle::DSL.parse(file.read, file.path, @options)
     else
-      raise TypeError, "Can not convert #{file} into File"
+      raise TypeError, "Cannot convert #{file} into File"
     end
   end
 
