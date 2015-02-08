@@ -2,6 +2,9 @@
 
 It is a tool for execute script, and define cron on remote hosts.
 
+[![Gem Version](https://badge.fury.io/rb/cronicle.svg)](http://badge.fury.io/rb/cronicle)
+[![Build Status](https://travis-ci.org/winebarrel/cronicle.svg?branch=master)](https://travis-ci.org/winebarrel/cronicle)
+
 ## Installation
 
 Add this line to your application's Gemfile:
