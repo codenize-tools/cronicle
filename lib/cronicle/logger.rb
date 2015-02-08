@@ -25,6 +25,7 @@ class Cronicle::Logger < ::Logger
     def log(level, message, opts = {})
       message = "#{level.to_s.downcase}: #{message}" unless level == :info
       message << ' (dry-run)' if opts[:dry_run]
+      message.gsub!(/\s+\z/, '')
       message = message.send(opts[:color]) if opts[:color]
 
       host_user_job = []
