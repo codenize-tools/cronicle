@@ -37,7 +37,7 @@ echo 'ec2-user ALL=(ALL) ALL' > /etc/sudoers.d/cloud-init
       aws.secret_access_key = ENV["AWS_SECRET_ACCESS_KEY"]
       aws.keypair_name = ENV["EC2_KEYPAIR_NAME"]
       aws.instance_type = "t1.micro"
-      aws.region = "ap-northeast-1"
+      aws.region = ENV["AWS_REGION"]
       aws.terminate_on_shutdown = true
       aws.ami = "ami-18b6aa19"
 
