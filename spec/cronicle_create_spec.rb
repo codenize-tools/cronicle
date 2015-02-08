@@ -154,9 +154,10 @@ describe 'Cronicle#apply (create)' do
       RUBY
     end
 
-    let(:amzn_crontab) do
-      {
-        "/var/spool/cron/ec2-user" =>
+    context 'when apply' do
+      let(:amzn_crontab) do
+        {
+          "/var/spool/cron/ec2-user" =>
 "FOO=bar
 ZOO=baz
 1 1 1 1 1 echo ec2-user > /dev/null
@@ -169,12 +170,12 @@ ZOO=baz
 1 2 * * *\t/var/lib/cronicle/libexec/root/foo 2>&1 | logger -t cronicle/root/foo
 @hourly\t/var/lib/cronicle/libexec/root/bar 2>&1 | logger -t cronicle/root/bar
 "
-      }
-    end
+        }
+      end
 
-    let(:ubuntu_crontab) do
-      {
-        "/var/spool/cron/crontabs/root" =>
+      let(:ubuntu_crontab) do
+        {
+          "/var/spool/cron/crontabs/root" =>
 "FOO=bar
 ZOO=baz
 1 1 1 1 1 echo root > /dev/null
@@ -187,56 +188,107 @@ ZOO=baz
 1 1 1 1 1 echo ubuntu > /dev/null
 @daily\t/var/lib/cronicle/libexec/ubuntu/foo 2>&1 | logger -t cronicle/ubuntu/foo
 "
-      }
-    end
+        }
+      end
 
-    before do
-      cronicle(:apply) { jobfile }
-    end
+      before do
+        cronicle(:apply) { jobfile }
+      end
 
-    it do
-      on :amazon_linux do
-        expect(get_uname).to match /amzn/
-        expect(get_crontabs).to eq amzn_crontab
+      it do
+        on :amazon_linux do
+          expect(get_uname).to match /amzn/
+          expect(get_crontabs).to eq amzn_crontab
 
-        expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.undent
-          #!/usr/bin/env ruby
-          puts `uname`
-          puts `whoami`
-        EOS
+          expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.undent
+            #!/usr/bin/env ruby
+            puts `uname`
+            puts `whoami`
+          EOS
 
-        expect(get_file('/var/lib/cronicle/libexec/root/bar')).to eq <<-EOS.undent
-          #!/bin/sh
-          echo hello
-        EOS
+          expect(get_file('/var/lib/cronicle/libexec/root/bar')).to eq <<-EOS.undent
+            #!/bin/sh
+            echo hello
+          EOS
 
-        expect(get_file('/var/lib/cronicle/libexec/ec2-user/foo')).to eq <<-EOS.undent
-          #!/usr/bin/env ruby
-          puts 100
-        EOS
+          expect(get_file('/var/lib/cronicle/libexec/ec2-user/foo')).to eq <<-EOS.undent
+            #!/usr/bin/env ruby
+            puts 100
+          EOS
+        end
+      end
+
+      it do
+        on :ubuntu do
+          expect(get_uname).to match /Ubuntu/
+          expect(get_crontabs).to eq ubuntu_crontab
+
+          expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.undent
+            #!/usr/bin/env ruby
+            puts `uname`
+            puts `whoami`
+          EOS
+
+          expect(get_file('/var/lib/cronicle/libexec/root/bar')).to eq <<-EOS.undent
+            #!/bin/sh
+            echo hello
+          EOS
+
+          expect(get_file('/var/lib/cronicle/libexec/ubuntu/foo')).to eq <<-EOS.undent
+            #!/usr/bin/env ruby
+            puts 200
+          EOS
+        end
       end
     end
 
-    it do
-      on :ubuntu do
-        expect(get_uname).to match /Ubuntu/
-        expect(get_crontabs).to eq ubuntu_crontab
+    context 'when apply (dry-run)' do
+      let(:amzn_crontab) do
+        {
+          "/var/spool/cron/ec2-user" =>
+"FOO=bar
+ZOO=baz
+1 1 1 1 1 echo ec2-user > /dev/null
+",
+        "/var/spool/cron/root" =>
+"FOO=bar
+ZOO=baz
+1 1 1 1 1 echo root > /dev/null
+"
+        }
+      end
 
-        expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.undent
-          #!/usr/bin/env ruby
-          puts `uname`
-          puts `whoami`
-        EOS
+      let(:ubuntu_crontab) do
+        {
+          "/var/spool/cron/crontabs/root" =>
+"FOO=bar
+ZOO=baz
+1 1 1 1 1 echo root > /dev/null
+",
+        "/var/spool/cron/crontabs/ubuntu" =>
+"FOO=bar
+ZOO=baz
+1 1 1 1 1 echo ubuntu > /dev/null
+"
+        }
+      end
 
-        expect(get_file('/var/lib/cronicle/libexec/root/bar')).to eq <<-EOS.undent
-          #!/bin/sh
-          echo hello
-        EOS
+      before do
+        cronicle(:apply, dry_run: true) { jobfile }
+      end
 
-        expect(get_file('/var/lib/cronicle/libexec/ubuntu/foo')).to eq <<-EOS.undent
-          #!/usr/bin/env ruby
-          puts 200
-        EOS
+      it do
+        on :amazon_linux do
+          expect(get_uname).to match /amzn/
+          expect(get_crontabs).to eq amzn_crontab
+        end
+      end
+
+      it do
+        on :ubuntu do
+          expect(get_uname).to match /Ubuntu/
+          expect(get_crontabs).to eq ubuntu_crontab
+        end
       end
     end
   end
