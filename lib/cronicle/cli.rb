@@ -10,6 +10,7 @@ class Cronicle::CLI < Thor
   class_option 'connection-timeout',                   :desc => 'SSH connection timeout',     :type => :numeric, :default => nil
   class_option 'concurrency',                          :desc => 'SSH concurrency',            :type => :numeric, :default => 10
   class_option 'libexec',                              :desc => 'Cronicle libexec path',      :default => '/var/lib/cronicle/libexec'
+  class_option 'verbose',            :aliases => '-v', :desc => 'Verbose mode',               :type => :boolean, :default => false
   class_option 'debug',                                :desc => 'Debug mode',                 :type => :boolean, :default => false
   class_option 'color',                                :desc => 'Colorize log',               :type => :boolean, :default => true
 
@@ -81,7 +82,8 @@ class Cronicle::CLI < Thor
       :sudo_password => options['sudo-password'],
       :concurrency => options['concurrency'],
       :libexec => options['libexec'],
-      :dry_run => options['dry-run']
+      :dry_run => options['dry-run'],
+      :verbose => options['verbose']
     }
   end
 

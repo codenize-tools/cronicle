@@ -28,17 +28,14 @@ class Cronicle::Logger < ::Logger
       message.gsub!(/\s+\z/, '')
       message = message.send(opts[:color]) if opts[:color]
 
-      host_user_job = []
-
-      [:host, :user, :job].each do |key|
+      job_info = "%s on %s/%s>" % [:job, :host, :user].map do |key|
         next unless opts[key]
         value = opts[key]
         value = Cronicle::Utils.short_hostname(value) if key == :host
-        host_user_job << value
+        value
       end
 
-      unless host_user_job.empty?
-        job_info = host_user_job.join('/') + '>'
+      unless job_info.empty?
         job_info = job_info.light_black
         message = "#{job_info} #{message}"
       end

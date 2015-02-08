@@ -38,16 +38,19 @@ class Cronicle::Driver
     execute do
       mktemp do |temp_dir|
         jobs.each do |name, job|
-          host_user_job = {:host => host.hostname, :user => user, :job => name}
+          log_opts = {:color => :cyan, :host => host.hostname, :user => user, :job => name}
           log_msg = 'Execute job'
 
           if host.options[:dry_run]
-            content = job[:content].each_line.map {|l| ' ' + l }.join
-            log_msg << "\n" << content.chomp << "\n"
-            log_for_cronicle(:info, log_msg, host_user_job.merge(:color => :cyan))
+            if host.options[:verbose]
+              content = job[:content].each_line.map {|l| ' ' + l }.join
+              log_msg << "\n" << content.chomp << "\n"
+            end
+
+            log_for_cronicle(:info, log_msg, log_opts)
             next
           else
-            log_for_cronicle(:info, log_msg, host_user_job.merge(:color => :cyan))
+            log_for_cronicle(:info, log_msg, log_opts)
           end
 
           upload_script(temp_dir, name, job[:content]) do |temp_script|
@@ -90,15 +93,16 @@ class Cronicle::Driver
 
   def create_or_update_job(user, name, job, script = nil)
     execute do
-      host_user_job = {:host => host.hostname, :user => user, :job => name}
-      content_orig = script ? script[:content] : ''
-      delta = Cronicle::Utils.diff(content_orig, job[:content])
+      log_opts = {:host => host.hostname, :user => user, :job => name}
+      log_opts[:color] = script ? :green : :cyan
+      log_msg = (script ? 'Update' : 'Create') + " job: schedule=#{job[:schedule].inspect}"
 
-      if script
-        log_for_cronicle(:info, "Update job: schedule=#{job[:schedule]}\n#{delta}", host_user_job.merge(:color => :green))
-      else
-        log_for_cronicle(:info, "Create job: schedule=#{job[:schedule]}\n#{delta}", host_user_job.merge(:color => :cyan))
+      if host.options[:verbose]
+        content_orig = script ? script[:content] : ''
+        log_msg << "\n" << Cronicle::Utils.diff(content_orig, job[:content])
       end
+
+      log_for_cronicle(:info, log_msg, log_opts)
 
       unless host.options[:dry_run]
         mktemp(user) do |temp_dir, user_temp_dir|
@@ -123,9 +127,10 @@ class Cronicle::Driver
         scripts.each do |name, script|
           next if target_name && target_name != name
 
-          host_user_job = {:host => host.hostname, :user => user, :job => name}
-          log_msg = "Delete job: schedule=#{script[:schedule]}\n" + Cronicle::Utils.diff(script[:content], '')
-          log_for_cronicle(:info, log_msg, host_user_job.merge(:color => :red))
+          log_opts = {:color => :red, :host => host.hostname, :user => user, :job => name}
+          log_msg = "Delete job: schedule=#{script[:schedule].inspect}"
+          log_msg << "\n" << Cronicle::Utils.diff(script[:content], '') if host.options[:verbose]
+          log_for_cronicle(:info, log_msg, log_opts)
 
           unless host.options[:dry_run]
             delete_cron_entry(user, name)

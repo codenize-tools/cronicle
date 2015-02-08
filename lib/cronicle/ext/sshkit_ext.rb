@@ -67,7 +67,7 @@ class SSHKit::Backend::Netssh
   end
 
   def delete_cron_entry(user, name = nil)
-    sed_cmd = '/' + Cronicle::Utils.sed_escape(script_path(user, name)) + '/d'
+    sed_cmd = '/' + Cronicle::Utils.sed_escape(script_path(user, name)) + ' /d'
     sed_cmd = Shellwords.shellescape(sed_cmd)
 
     sudo(:execute, :sed, '-i', sed_cmd, user_crontab(user), :raise_on_non_zero_exit => false)
