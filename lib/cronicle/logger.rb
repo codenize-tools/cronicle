@@ -36,6 +36,7 @@ class Cronicle::Logger < ::Logger
 
       host_user = [:host, :user].map {|key|
         value = opts[key]
+	next unless value
         value = Cronicle::Utils.short_hostname(value) if key == :host
         value
       }.compact

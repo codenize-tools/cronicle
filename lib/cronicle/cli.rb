@@ -5,6 +5,7 @@ class Cronicle::CLI < Thor
   class_option 'hosts',              :aliases => '-h', :desc => 'Hosts definition file'
   class_option 'target-roles',       :aliases => '-r', :desc => 'Target host role list',      :type => :array
   class_option 'sudo-password',      :aliases => '-p', :desc => 'Sudo password'
+  class_option 'ask-pass',                             :desc => 'Ask sudo password',          :type => :boolean, :default => false
   class_option 'dry-run',                              :desc => 'Do not actually change',     :type => :boolean, :default => false
   class_option 'ssh-config',         :aliases => '-c', :desc => 'OpenSSH configuration file', :default => nil
   class_option 'connection-timeout',                   :desc => 'SSH connection timeout',     :type => :numeric, :default => nil
@@ -78,13 +79,20 @@ class Cronicle::CLI < Thor
   end
 
   def client_options
-    {
+    client_opts = {
       :sudo_password => options['sudo-password'],
       :concurrency => options['concurrency'],
       :libexec => options['libexec'],
       :dry_run => options['dry-run'],
       :verbose => options['verbose']
     }
+
+    if options['ask-pass']
+      hl = HighLine.new
+      client_opts[:sudo_password] = hl.ask('Password: ') {|q| q.echo = '*' }
+    end
+
+    client_opts
   end
 
   def host_list_options

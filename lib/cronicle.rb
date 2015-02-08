@@ -1,5 +1,6 @@
 require 'colorize'
 require 'diffy'
+require 'highline'
 require 'json'
 require 'parallel'
 require 'set'
