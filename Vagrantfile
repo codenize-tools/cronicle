@@ -14,9 +14,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       aws.secret_access_key = ENV["AWS_SECRET_ACCESS_KEY"]
       aws.keypair_name = ENV["EC2_KEYPAIR_NAME"]
       aws.instance_type = "m1.large"
-      aws.region = "ap-northeast-1"
+      aws.region = ENV["AWS_REGION"] || 'us-east-1'
       aws.terminate_on_shutdown = true
-      aws.ami = "ami-3c87993d"
+      aws.ami = ENV["AMAZON_LINUX_AMI"] || "ami-8e682ce6"
 
       override.ssh.username = "ec2-user"
       override.ssh.private_key_path = ENV["EC2_PRIVATE_KEY_PATH"] || ENV["EC2_KEYPAIR_NAME"] + ".pem"
@@ -37,9 +37,9 @@ echo 'ec2-user ALL=(ALL) ALL' > /etc/sudoers.d/cloud-init
       aws.secret_access_key = ENV["AWS_SECRET_ACCESS_KEY"]
       aws.keypair_name = ENV["EC2_KEYPAIR_NAME"]
       aws.instance_type = "m1.large"
-      aws.region = "ap-northeast-1"
+      aws.region = ENV["AWS_REGION"] || 'us-east-1'
       aws.terminate_on_shutdown = true
-      aws.ami = "ami-18b6aa19"
+      aws.ami = ENV['UBUNTU_AMI'] || "ami-84562dec"
 
       override.ssh.username = "ubuntu"
       override.ssh.private_key_path = ENV["EC2_PRIVATE_KEY_PATH"] || ENV["EC2_KEYPAIR_NAME"] + ".pem"
