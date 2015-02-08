@@ -35,9 +35,7 @@ class Cronicle::Driver
   end
 
   def execute_job(user, jobs)
-    driver = self
-
-    execute do |host|
+    execute do
       mktemp do |temp_dir|
         jobs.each do |name, job|
           upload_script(temp_dir, name, job[:content]) do |temp_script|
@@ -119,5 +117,15 @@ class Cronicle::Driver
         end
       end
     end
+  end
+
+  def test_sudo
+    result = false
+
+    execute do
+      result = sudo(:execute, :echo, :raise_on_non_zero_exit => false)
+    end
+
+    result
   end
 end

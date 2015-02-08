@@ -97,7 +97,12 @@ class Cronicle::Client
 
   def run_driver(host)
     driver = Cronicle::Driver.new(Array(host), @options)
-    yield(driver)
+
+    if driver.test_sudo
+      yield(driver)
+    else
+      log(:error, 'Incorrect sudo password', :color => :red, :host => Cronicle::Utils.short_hostname(host))
+    end
   end
 
   def select_host(jobs, target_name = nil)

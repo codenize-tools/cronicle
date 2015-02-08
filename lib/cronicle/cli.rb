@@ -33,6 +33,7 @@ class Cronicle::CLI < Thor
   end
 
   desc 'apply', 'Apply cron jobs to remote hosts'
+  option 'dry-run', :desc => 'Do not actually change', :type => :boolean, :default => false
   def apply
     with_logging do
       set_ssh_options
@@ -79,7 +80,8 @@ class Cronicle::CLI < Thor
     {
       :sudo_password => options['sudo-password'],
       :concurrency => options['concurrency'],
-      :libexec => options['libexec']
+      :libexec => options['libexec'],
+      :dry_run => options['dry-run']
     }
   end
 
