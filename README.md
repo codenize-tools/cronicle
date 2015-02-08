@@ -1,6 +1,6 @@
 # Cronicle
 
-TODO: Write a gem description
+It is a tool for execute script, and define cron on remote hosts.
 
 ## Installation
 
@@ -49,13 +49,28 @@ Options:
 
 ```sh
 $ cat Jobfile
-on servers: :your_amazon_linux_hostname do
+on servers: :your_hostname do
   job :my_job, user: 'ec2-user', schedule: "* * * * *" do
     puts "hello"
   end
 end
 
 $ cronicle exec my_job
+my_job on your_hostname/ec2-user> Execute job
+my_job on your_hostname/ec2-user> hello
+
+$ cronicle apply --dry-run
+my_job on your_hostname/ec2-user> Create job: schedule="* * * * *" (dry-run)
+
+$ cronicle apply
+my_job on your_hostname/ec2-user> Create job: schedule="* * * * *"
+
+$ ssh your_hostname 'crontab -l'
+* * * * * /var/lib/cronicle/libexec/ec2-user/my_job 2>&1 | logger -t cronicle/ec2-user/my_job
+
+$ ssh your_hostname 'cat /var/lib/cronicle/libexec/ec2-user/my_job'
+#!/usr/bin/env ruby
+puts "hello"
 ```
 
 ## Hosts definition file
@@ -84,11 +99,3 @@ server2
   }
 }
 ```
-
-## Contributing
-
-1. Fork it ( https://github.com/[my-github-username]/cronicle/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
