@@ -5,7 +5,7 @@ before_install:
 - openssl aes-256-cbc -K $encrypted_3e901e83a832_key -iv $encrypted_3e901e83a832_iv
   -in cronicle.pem.enc -out cronicle.pem -d
 install:
-- sudo apt-get install vagrant
+- sudo apt-get -y install vagrant
 script:
 - bundle install
 - bundle exec rake vagrant:up
