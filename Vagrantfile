@@ -19,7 +19,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       aws.ami = "ami-3c87993d"
 
       override.ssh.username = "ec2-user"
-      override.ssh.private_key_path = ENV["EC2_PRIVATE_KEY_PATH"]
+      override.ssh.private_key_path = ENV["EC2_PRIVATE_KEY_PATH"] || ENV["EC2_KEYPAIR_NAME"] + ".pem"
       override.ssh.pty = true
 
       override.vm.provision "shell", inline: <<-SH
@@ -42,7 +42,7 @@ echo 'ec2-user ALL=(ALL) ALL' > /etc/sudoers.d/cloud-init
       aws.ami = "ami-18b6aa19"
 
       override.ssh.username = "ubuntu"
-      override.ssh.private_key_path = ENV["EC2_PRIVATE_KEY_PATH"]
+      override.ssh.private_key_path = ENV["EC2_PRIVATE_KEY_PATH"] || ENV["EC2_KEYPAIR_NAME"] + ".pem"
       override.ssh.pty = true
 
       override.vm.provision "shell", inline: <<-SH
