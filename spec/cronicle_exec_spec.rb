@@ -98,4 +98,23 @@ describe 'Cronicle#exec' do
       EOS
     end
   end
+
+  context 'jon is not defined' do
+    let(:jobfile) do
+      <<-RUBY.undent
+        on servers: /.*/ do
+          job :foo, user: :root do
+            puts `uname`
+            puts `whoami`
+          end
+        end
+      RUBY
+    end
+
+    it do
+      expect {
+        cronicle(:exec, :bar, logger: logger) { jobfile }
+      }.to raise_error('Definition cannot be found: Job `bar`')
+    end
+  end
 end
