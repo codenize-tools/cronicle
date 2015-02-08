@@ -35,6 +35,7 @@ Options:
   -h, [--hosts=HOSTS]                  # Hosts definition file
   -r, [--target-roles=one two three]   # Target host role list
   -p, [--sudo-password=SUDO-PASSWORD]  # Sudo password
+      [--ask-pass], [--no-ask-pass]    # Ask sudo password
       [--dry-run], [--no-dry-run]      # Do not actually change
   -c, [--ssh-config=SSH-CONFIG]        # OpenSSH configuration file
       [--connection-timeout=N]         # SSH connection timeout
