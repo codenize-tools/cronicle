@@ -84,6 +84,21 @@ $ ssh your_hostname 'cat /var/lib/cronicle/libexec/ec2-user/my_job'
 puts "hello"
 ```
 
+## Jobfile example
+
+```ruby
+on servers: :your_hostname do
+  job :my_job, user: "ec2-user", schedule: "* * * * *" do
+    puts "hello"
+  end
+
+  job :my_job2, user: "ec2-user", schedule: "* * * * *", content: <<-EOS
+    #!/bin/sh
+    echo hello
+  EOS
+end
+```
+
 ## Hosts definition file
 
 Any of the following formats:
