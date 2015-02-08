@@ -1,4 +1,4 @@
-describe 'Cronicle#apply (update)' do
+describe 'Cronicle::Client#apply (update)' do
   before do
     on TARGET_HOSTS do |ssh_options|
       user = ssh_options[:user]

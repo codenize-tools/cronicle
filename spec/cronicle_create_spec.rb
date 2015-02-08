@@ -1,4 +1,4 @@
-describe 'Cronicle#apply (create)' do
+describe 'Cronicle::Client#apply (create)' do
   context 'when empty cron' do
     let(:jobfile) do
       <<-RUBY.undent

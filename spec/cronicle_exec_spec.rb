@@ -1,4 +1,4 @@
-describe 'Cronicle#exec' do
+describe 'Cronicle::Client#exec' do
   let(:logger_out) { StringIO.new }
 
   let(:logger) do
