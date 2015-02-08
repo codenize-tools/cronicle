@@ -77,6 +77,9 @@ puts "hello"
 ```
 
 ## Hosts definition file
+
+Any of the following formats:
+
 ```
 server1,server2,...
 ```
