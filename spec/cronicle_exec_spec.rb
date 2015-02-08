@@ -59,6 +59,45 @@ describe 'Cronicle#exec' do
     end
   end
 
+  context 'run as root (dry-run)' do
+    let(:jobfile) do
+      <<-RUBY.undent
+        on servers: /.*/ do
+          job :foo, user: :root do
+            puts `uname`
+            puts `whoami`
+          end
+        end
+
+        on servers: /.*/ do
+          job :bar, user: :root, content: <<-SH.undent
+            #!/bin/sh
+            echo hello
+          SH
+        end
+      RUBY
+    end
+
+    before do
+      cronicle(:exec, :foo, logger: logger, dry_run: true) { jobfile }
+      cronicle(:exec, :bar, logger: logger, dry_run: true) { jobfile }
+    end
+
+    it do
+      expect(amzn_out).to eq <<-EOS.undent
+        foo on amazon_linux/root> Execute job (dry-run)
+        bar on amazon_linux/root> Execute job (dry-run)
+      EOS
+    end
+
+    it do
+      expect(ubuntu_out).to eq <<-EOS.undent
+        foo on ubuntu/root> Execute job (dry-run)
+        bar on ubuntu/root> Execute job (dry-run)
+      EOS
+    end
+  end
+
   context 'run as non-root user' do
     let(:jobfile) do
       <<-RUBY.undent
