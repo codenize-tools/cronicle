@@ -56,6 +56,11 @@ on servers: :your_hostname do
   job :my_job, user: "ec2-user", schedule: "* * * * *" do
     puts "hello"
   end
+
+  job :my_job2, user: "ec2-user", schedule: "* * * * *", content: <<-EOS
+    #!/bin/sh
+    echo hello
+  EOS
 end
 
 $ cronicle exec my_job
@@ -64,12 +69,15 @@ my_job on your_hostname/ec2-user> hello
 
 $ cronicle apply --dry-run
 my_job on your_hostname/ec2-user> Create job: schedule="* * * * *" (dry-run)
+my_job2 on your_hostname/ec2-user> Create job: schedule="* * * * *" (dry-run)
 
 $ cronicle apply
 my_job on your_hostname/ec2-user> Create job: schedule="* * * * *"
+my_job2 on your_hostname/ec2-user> Create job: schedule="* * * * *"
 
 $ ssh your_hostname 'crontab -l'
 * * * * * /var/lib/cronicle/libexec/ec2-user/my_job 2>&1 | logger -t cronicle/ec2-user/my_job
+* * * * * /var/lib/cronicle/libexec/ec2-user/my_job2 2>&1 | logger -t cronicle/ec2-user/my_job2
 
 $ ssh your_hostname 'cat /var/lib/cronicle/libexec/ec2-user/my_job'
 #!/usr/bin/env ruby
