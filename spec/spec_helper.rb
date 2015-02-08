@@ -50,6 +50,10 @@ def get_crontabs
   }.flatten]
 end
 
+def get_file(path)
+  Specinfra.backend.run_command("cat #{path}").stdout
+end
+
 def get_uname
   Specinfra.backend.run_command('uname -a').stdout.strip
 end
@@ -125,6 +129,7 @@ def cronicle_client(options = {})
 
   if ENV['DEBUG'] == '1'
     options[:debug] = true
+    Cronicle::Logger.instance.set_debug(true)
   else
     options[:logger] ||= Logger.new('/dev/null')
   end

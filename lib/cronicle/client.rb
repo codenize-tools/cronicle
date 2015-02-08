@@ -1,12 +1,14 @@
 class Cronicle::Client
   include Cronicle::Logger::Helper
 
+  DEFAULTS = {
+    :concurrency => 10,
+    :libexec => '/var/lib/cronicle/libexec'
+  }
+
   def initialize(host_list, options = {})
     @host_list = host_list
-
-    @options = {
-      :concurrency => 10
-    }.merge(options)
+    @options = DEFAULTS.merge(options)
   end
 
   def apply(file)

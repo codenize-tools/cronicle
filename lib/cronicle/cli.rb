@@ -8,8 +8,8 @@ class Cronicle::CLI < Thor
   class_option 'dry-run',                              :desc => 'Do not actually change',     :type => :boolean, :default => false
   class_option 'ssh-config',         :aliases => '-c', :desc => 'OpenSSH configuration file', :default => nil
   class_option 'connection-timeout',                   :desc => 'SSH connection timeout',     :type => :numeric, :default => nil
-  class_option 'concurrency',                          :desc => 'SSH concurrency',            :type => :numeric, :default => 10
-  class_option 'libexec',                              :desc => 'Cronicle libexec path',      :default => '/var/lib/cronicle/libexec'
+  class_option 'concurrency',                          :desc => 'SSH concurrency',            :type => :numeric, :default => Cronicle::Client::DEFAULTS[:concurrency]
+  class_option 'libexec',                              :desc => 'Cronicle libexec path',      :default => Cronicle::Client::DEFAULTS[:libexec]
   class_option 'verbose',            :aliases => '-v', :desc => 'Verbose mode',               :type => :boolean, :default => false
   class_option 'debug',                                :desc => 'Debug mode',                 :type => :boolean, :default => false
   class_option 'color',                                :desc => 'Colorize log',               :type => :boolean, :default => true
