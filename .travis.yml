@@ -13,6 +13,8 @@ before_script:
 script:
 - bundle install
 - bundle exec rake
+- pwd
+- vagrant ssh-config
 after_script:
 - vagrant destroy -f
 env:
