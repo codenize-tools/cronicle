@@ -4,6 +4,7 @@ rvm:
 before_install:
 - openssl aes-256-cbc -K $encrypted_3e901e83a832_key -iv $encrypted_3e901e83a832_iv
   -in cronicle.pem.enc -out cronicle.pem -d
+- chmod 600 cronicle.pem
 install:
 - wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.7.2_x86_64.deb
 - sudo dpkg -i vagrant_1.7.2_x86_64.deb
@@ -12,8 +13,6 @@ before_script:
 - vagrant up --provider=aws
 script:
 - bundle install
-- pwd
-- vagrant ssh-config
 - bundle exec rake
 after_script:
 - vagrant destroy -f
