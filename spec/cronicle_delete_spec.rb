@@ -86,15 +86,8 @@ ZOO=baz
       on servers: /.*/ do
         job :foo, user: :root, schedule: '1 2 * * *' do
           puts `uname`
-          #puts `whoami`
+          puts `whoami`
         end
-      end
-
-      on servers: /.*/ do
-        job :bar, user: :root, schedule: :@hourly, content: <<-SH.undent
-          #!/bin/sh
-          echo hello
-        SH
       end
 
       on servers: /amazon_linux/ do
@@ -102,16 +95,10 @@ ZOO=baz
           puts 100
         end
       end
-
-      on servers: /ubuntu/ do
-        job :foo2, user: :ubuntu, schedule: :@daily do
-          puts 200
-        end
-      end
     RUBY
   end
 
-  context 'when cron is updated' do
+  context 'when cron is deleted' do
     let(:amzn_crontab) do
       {
         "/var/spool/cron/ec2-user" =>
@@ -124,7 +111,6 @@ ZOO=baz
 "FOO=bar
 ZOO=baz
 1 1 1 1 1 echo root > /dev/null
-@hourly\t/var/lib/cronicle/libexec/root/bar 2>&1 | logger -t cronicle/root/bar
 1 2 * * *\t/var/lib/cronicle/libexec/root/foo 2>&1 | logger -t cronicle/root/foo
 "
       }
@@ -136,14 +122,12 @@ ZOO=baz
 "FOO=bar
 ZOO=baz
 1 1 1 1 1 echo root > /dev/null
-@hourly\t/var/lib/cronicle/libexec/root/bar 2>&1 | logger -t cronicle/root/bar
 1 2 * * *\t/var/lib/cronicle/libexec/root/foo 2>&1 | logger -t cronicle/root/foo
 ",
         "/var/spool/cron/crontabs/ubuntu" =>
 "FOO=bar
 ZOO=baz
 1 1 1 1 1 echo ubuntu > /dev/null
-@daily\t/var/lib/cronicle/libexec/ubuntu/foo2 2>&1 | logger -t cronicle/ubuntu/foo2
 "
       }
     end
@@ -200,12 +184,7 @@ ZOO=baz
         expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.undent
           #!/usr/bin/env ruby
           puts `uname`
-          #puts `whoami`
-        EOS
-
-        expect(get_file('/var/lib/cronicle/libexec/root/bar')).to eq <<-EOS.undent
-          #!/bin/sh
-          echo hello
+          puts `whoami`
         EOS
 
         expect(get_file('/var/lib/cronicle/libexec/ec2-user/foo')).to eq <<-EOS.undent
@@ -221,23 +200,13 @@ ZOO=baz
         expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.undent
           #!/usr/bin/env ruby
           puts `uname`
-          #puts `whoami`
-        EOS
-
-        expect(get_file('/var/lib/cronicle/libexec/root/bar')).to eq <<-EOS.undent
-          #!/bin/sh
-          echo hello
-        EOS
-
-        expect(get_file('/var/lib/cronicle/libexec/ubuntu/foo2')).to eq <<-EOS.undent
-          #!/usr/bin/env ruby
-          puts 200
+          puts `whoami`
         EOS
       end
     end
   end
 
-  context 'when cron is updated (dry-run)' do
+  context 'when cron is deleted (dry-run)' do
     let(:amzn_crontab) do
       {
         "/var/spool/cron/ec2-user" =>
