@@ -8,6 +8,7 @@ class Cronicle::CLI < Thor
   class_option 'ask-pass',                             :desc => 'Ask sudo password',          :type => :boolean, :default => false
   class_option 'dry-run',                              :desc => 'Do not actually change',     :type => :boolean, :default => false
   class_option 'ssh-config',         :aliases => '-c', :desc => 'OpenSSH configuration file', :default => nil
+  class_option 'ssh-options',                          :desc => 'SSH options (JSON)',         :default => nil
   class_option 'connection-timeout',                   :desc => 'SSH connection timeout',     :type => :numeric, :default => nil
   class_option 'concurrency',                          :desc => 'SSH concurrency',            :type => :numeric, :default => Cronicle::Client::DEFAULTS[:concurrency]
   class_option 'libexec',                              :desc => 'Cronicle libexec path',      :default => Cronicle::Client::DEFAULTS[:libexec]
@@ -103,11 +104,19 @@ class Cronicle::CLI < Thor
 
   def set_ssh_options
     conn_timeout = options['connection-timeout']
-    ssh_config = options['ssh-config']
+    ssh_options = {}
+
+    if options['ssh-options']
+      JSON.parse(options['ssh-options']).each do |key, value|
+        ssh_options[key.to_sym] = value
+      end
+    end
+
+    ssh_options[:config] = options['ssh-config'] if options['ssh-config']
 
     SSHKit::Backend::Netssh.configure do |ssh|
       ssh.connection_timeout = conn_timeout if conn_timeout
-      ssh.ssh_options = {:config => ssh_config} if ssh_config
+      ssh.ssh_options = ssh_options unless ssh_options.empty?
     end
   end
 end
