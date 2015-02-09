@@ -1,0 +1,14 @@
+# Site settings
+title: Cronicle
+email: sgwr_dts@yahoo.co.jp
+description: "It is a tool for execute script, and define cron on remote hosts."
+baseurl: "" # the subpath of your site, e.g. /blog/
+url: "http://cronicle.codenize.tools/"
+github_url: "https://github.com/winebarrel/cronicle"
+twitter_username: sgwr_dts
+github_username:  winebarrel
+original_background_image_url: "https://www.flickr.com/photos/98640399@N08/9340868026/in/photolist-8Jv6eU-4XKfPD-8XbPUw-bo4wyM-qLQqf-dyH7Hb-feqoCJ-6v5YVr-a1wMa3-9cjMwC-9hsevd-8FmNgA-4SuyD7-fmSHtY-ahounN-jR1PuL-75upwZ-6ArPMH-hW2eGb-7hNPoi"
+background_image_licence: "images/background.license"
+
+# Build settings
+markdown: kramdown
