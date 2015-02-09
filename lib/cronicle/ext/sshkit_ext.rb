@@ -1,18 +1,21 @@
 SSHKit::Backend::Netssh.config.pty = true
 
 class SSHKit::Backend::Netssh
+  SUDO_PASSWORD_KEY = :'__cronicle_sudo_password__'
+  SUDO_PROMPT = '__cronicle_sudo_prompt__'
+
   def sudo(command, *args)
     opts = args.last.kind_of?(Hash) ? args.pop : {}
 
-    password = host.options[:sudo_password] || ''
-    password = Shellwords.shellescape(password)
+    retval = with_sudo_password(host.options[:sudo_password]) do
+      with_sudo = [:sudo, '-p', SUDO_PROMPT, '-S']
+      with_sudo << '-u' << opts[:user] if opts[:user]
+      with_sudo.concat(args)
 
-    with_sudo = [:echo, password, '|', :sudo, '-S']
-    with_sudo << '-u' << opts[:user] if opts[:user]
-    with_sudo.concat(args)
+      raise_on_non_zero_exit = opts.fetch(:raise_on_non_zero_exit, true)
+      send(command, *with_sudo, :raise_on_non_zero_exit => raise_on_non_zero_exit)
+    end
 
-    raise_on_non_zero_exit = opts.fetch(:raise_on_non_zero_exit, true)
-    retval = send(command, *with_sudo, :raise_on_non_zero_exit => raise_on_non_zero_exit)
     Cronicle::Utils.remove_prompt!(retval) if retval.kind_of?(String)
     retval
   end
@@ -33,7 +36,8 @@ class SSHKit::Backend::Netssh
 
   def list_crontabs
     cron_dir = find_cron_dir
-    @crontab_list ||= sudo(:capture, :find, cron_dir, '-type', :f, '-maxdepth', 1, '2> /dev/null',
+    @crontab_list ||= sudo(:capture, :bash, '-c',
+                        Shellwords.shellescape("find #{cron_dir} -type f 2> /dev/null"),
                         :raise_on_non_zero_exit => false).each_line.map(&:strip)
   end
 
@@ -139,6 +143,15 @@ class SSHKit::Backend::Netssh
 
   def crlf_to_lf(str)
     str.gsub("\r\n", "\n")
+  end
+
+  def with_sudo_password(password)
+    begin
+      Thread.current[SUDO_PASSWORD_KEY] = password
+      yield
+    ensure
+      Thread.current[SUDO_PASSWORD_KEY] = nil
+    end
   end
 end
 

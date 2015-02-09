@@ -41,9 +41,11 @@ describe 'Cronicle::Client#exec' do
     it do
       expect(amzn_out).to eq <<-EOS.unindent
         foo on amazon_linux/root> Execute job
+        foo on amazon_linux/root>\s
         foo on amazon_linux/root> Linux
         foo on amazon_linux/root> root
         bar on amazon_linux/root> Execute job
+        bar on amazon_linux/root>\s
         bar on amazon_linux/root> hello
       EOS
     end
@@ -51,9 +53,11 @@ describe 'Cronicle::Client#exec' do
     it do
       expect(ubuntu_out).to eq <<-EOS.unindent
         foo on ubuntu/root> Execute job
+        foo on ubuntu/root>\s
         foo on ubuntu/root> Linux
         foo on ubuntu/root> root
         bar on ubuntu/root> Execute job
+        bar on ubuntu/root>\s
         bar on ubuntu/root> hello
       EOS
     end
