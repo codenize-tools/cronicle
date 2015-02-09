@@ -11,10 +11,10 @@ require 'sshkit'
 require 'sshkit/dsl'
 require 'tempfile'
 require 'thor'
+require 'unindent'
 
 module Cronicle; end
 require 'cronicle/ext/hash_ext'
-require 'cronicle/ext/string_ext'
 require 'cronicle/ext/sshkit_ext'
 require 'cronicle/logger'
 require 'cronicle/utils'

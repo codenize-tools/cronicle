@@ -19,7 +19,7 @@ describe Cronicle::HostList do
 
   context 'when list is passed' do
     let(:source) do
-      <<-EOS.undent
+      <<-EOS.unindent
         foo
         bar
       EOS
@@ -41,7 +41,7 @@ describe Cronicle::HostList do
   context 'when JSON(servers) is passed' do
     context 'when single server' do
       let(:source) do
-        <<-EOS.undent
+        <<-EOS.unindent
           {
             "servers": "foo"
           }
@@ -63,7 +63,7 @@ describe Cronicle::HostList do
 
     context 'when multiple servers' do
       let(:source) do
-        <<-EOS.undent
+        <<-EOS.unindent
           {
             "servers": ["foo", "bar"]
           }
@@ -85,7 +85,7 @@ describe Cronicle::HostList do
 
     context 'when multiple servers with role' do
       let(:source) do
-        <<-EOS.undent
+        <<-EOS.unindent
           {
             "servers": {
               "foo": "db",
@@ -112,7 +112,7 @@ describe Cronicle::HostList do
   context 'when JSON(roles) is passed' do
     context 'when single server' do
       let(:source) do
-        <<-EOS.undent
+        <<-EOS.unindent
           {
             "roles": {
               "web": "bar"
@@ -136,7 +136,7 @@ describe Cronicle::HostList do
 
     context 'when multiple servers' do
       let(:source) do
-        <<-EOS.undent
+        <<-EOS.unindent
           {
             "roles": {
               "db": ["foo", "bar"],

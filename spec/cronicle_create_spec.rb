@@ -1,7 +1,7 @@
 describe 'Cronicle::Client#apply (create)' do
   context 'when empty cron' do
     let(:jobfile) do
-      <<-RUBY.undent
+      <<-RUBY.unindent
         on servers: /.*/ do
           job :foo, user: :root, schedule: '1 2 * * *' do
             puts `uname`
@@ -10,7 +10,7 @@ describe 'Cronicle::Client#apply (create)' do
         end
 
         on servers: /.*/ do
-          job :bar, user: :root, schedule: :@hourly, content: <<-SH.undent
+          job :bar, user: :root, schedule: :@hourly, content: <<-SH.unindent
             #!/bin/sh
             echo hello
           SH
@@ -63,18 +63,18 @@ describe 'Cronicle::Client#apply (create)' do
         expect(get_uname).to match /amzn/
         expect(get_crontabs).to eq amzn_crontab
 
-        expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.undent
+        expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.unindent
           #!/usr/bin/env ruby
           puts `uname`
           puts `whoami`
         EOS
 
-        expect(get_file('/var/lib/cronicle/libexec/root/bar')).to eq <<-EOS.undent
+        expect(get_file('/var/lib/cronicle/libexec/root/bar')).to eq <<-EOS.unindent
           #!/bin/sh
           echo hello
         EOS
 
-        expect(get_file('/var/lib/cronicle/libexec/ec2-user/foo')).to eq <<-EOS.undent
+        expect(get_file('/var/lib/cronicle/libexec/ec2-user/foo')).to eq <<-EOS.unindent
           #!/usr/bin/env ruby
           puts 100
         EOS
@@ -86,18 +86,18 @@ describe 'Cronicle::Client#apply (create)' do
         expect(get_uname).to match /Ubuntu/
         expect(get_crontabs).to eq ubuntu_crontab
 
-        expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.undent
+        expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.unindent
           #!/usr/bin/env ruby
           puts `uname`
           puts `whoami`
         EOS
 
-        expect(get_file('/var/lib/cronicle/libexec/root/bar')).to eq <<-EOS.undent
+        expect(get_file('/var/lib/cronicle/libexec/root/bar')).to eq <<-EOS.unindent
           #!/bin/sh
           echo hello
         EOS
 
-        expect(get_file('/var/lib/cronicle/libexec/ubuntu/foo')).to eq <<-EOS.undent
+        expect(get_file('/var/lib/cronicle/libexec/ubuntu/foo')).to eq <<-EOS.unindent
           #!/usr/bin/env ruby
           puts 200
         EOS
@@ -110,13 +110,13 @@ describe 'Cronicle::Client#apply (create)' do
       on TARGET_HOSTS do |ssh_options|
         user = ssh_options[:user]
 
-        set_crontab user, <<-CRON.undent
+        set_crontab user, <<-CRON.unindent
           FOO=bar
           ZOO=baz
           1 1 1 1 1 echo #{user} > /dev/null
         CRON
 
-        set_crontab :root, <<-CRON.undent
+        set_crontab :root, <<-CRON.unindent
           FOO=bar
           ZOO=baz
           1 1 1 1 1 echo root > /dev/null
@@ -125,7 +125,7 @@ describe 'Cronicle::Client#apply (create)' do
     end
 
     let(:jobfile) do
-      <<-RUBY.undent
+      <<-RUBY.unindent
         on servers: /.*/ do
           job :foo, user: :root, schedule: '1 2 * * *' do
             puts `uname`
@@ -134,7 +134,7 @@ describe 'Cronicle::Client#apply (create)' do
         end
 
         on servers: /.*/ do
-          job :bar, user: :root, schedule: :@hourly, content: <<-SH.undent
+          job :bar, user: :root, schedule: :@hourly, content: <<-SH.unindent
             #!/bin/sh
             echo hello
           SH
@@ -200,18 +200,18 @@ ZOO=baz
           expect(get_uname).to match /amzn/
           expect(get_crontabs).to eq amzn_crontab
 
-          expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.undent
+          expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.unindent
             #!/usr/bin/env ruby
             puts `uname`
             puts `whoami`
           EOS
 
-          expect(get_file('/var/lib/cronicle/libexec/root/bar')).to eq <<-EOS.undent
+          expect(get_file('/var/lib/cronicle/libexec/root/bar')).to eq <<-EOS.unindent
             #!/bin/sh
             echo hello
           EOS
 
-          expect(get_file('/var/lib/cronicle/libexec/ec2-user/foo')).to eq <<-EOS.undent
+          expect(get_file('/var/lib/cronicle/libexec/ec2-user/foo')).to eq <<-EOS.unindent
             #!/usr/bin/env ruby
             puts 100
           EOS
@@ -223,18 +223,18 @@ ZOO=baz
           expect(get_uname).to match /Ubuntu/
           expect(get_crontabs).to eq ubuntu_crontab
 
-          expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.undent
+          expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.unindent
             #!/usr/bin/env ruby
             puts `uname`
             puts `whoami`
           EOS
 
-          expect(get_file('/var/lib/cronicle/libexec/root/bar')).to eq <<-EOS.undent
+          expect(get_file('/var/lib/cronicle/libexec/root/bar')).to eq <<-EOS.unindent
             #!/bin/sh
             echo hello
           EOS
 
-          expect(get_file('/var/lib/cronicle/libexec/ubuntu/foo')).to eq <<-EOS.undent
+          expect(get_file('/var/lib/cronicle/libexec/ubuntu/foo')).to eq <<-EOS.unindent
             #!/usr/bin/env ruby
             puts 200
           EOS

@@ -16,7 +16,7 @@ describe 'Cronicle::Client#exec' do
 
   context 'run as root' do
     let(:jobfile) do
-      <<-RUBY.undent
+      <<-RUBY.unindent
         on servers: /.*/ do
           job :foo, user: :root do
             puts `uname`
@@ -25,7 +25,7 @@ describe 'Cronicle::Client#exec' do
         end
 
         on servers: /.*/ do
-          job :bar, user: :root, content: <<-SH.undent
+          job :bar, user: :root, content: <<-SH.unindent
             #!/bin/sh
             echo hello
           SH
@@ -39,7 +39,7 @@ describe 'Cronicle::Client#exec' do
     end
 
     it do
-      expect(amzn_out).to eq <<-EOS.undent
+      expect(amzn_out).to eq <<-EOS.unindent
         foo on amazon_linux/root> Execute job
         foo on amazon_linux/root> Linux
         foo on amazon_linux/root> root
@@ -49,7 +49,7 @@ describe 'Cronicle::Client#exec' do
     end
 
     it do
-      expect(ubuntu_out).to eq <<-EOS.undent
+      expect(ubuntu_out).to eq <<-EOS.unindent
         foo on ubuntu/root> Execute job
         foo on ubuntu/root> Linux
         foo on ubuntu/root> root
@@ -61,7 +61,7 @@ describe 'Cronicle::Client#exec' do
 
   context 'run as root (dry-run)' do
     let(:jobfile) do
-      <<-RUBY.undent
+      <<-RUBY.unindent
         on servers: /.*/ do
           job :foo, user: :root do
             puts `uname`
@@ -70,7 +70,7 @@ describe 'Cronicle::Client#exec' do
         end
 
         on servers: /.*/ do
-          job :bar, user: :root, content: <<-SH.undent
+          job :bar, user: :root, content: <<-SH.unindent
             #!/bin/sh
             echo hello
           SH
@@ -84,14 +84,14 @@ describe 'Cronicle::Client#exec' do
     end
 
     it do
-      expect(amzn_out).to eq <<-EOS.undent
+      expect(amzn_out).to eq <<-EOS.unindent
         foo on amazon_linux/root> Execute job (dry-run)
         bar on amazon_linux/root> Execute job (dry-run)
       EOS
     end
 
     it do
-      expect(ubuntu_out).to eq <<-EOS.undent
+      expect(ubuntu_out).to eq <<-EOS.unindent
         foo on ubuntu/root> Execute job (dry-run)
         bar on ubuntu/root> Execute job (dry-run)
       EOS
@@ -100,7 +100,7 @@ describe 'Cronicle::Client#exec' do
 
   context 'run as non-root user' do
     let(:jobfile) do
-      <<-RUBY.undent
+      <<-RUBY.unindent
         on servers: /amazon_linux/ do
           job :foo, user: 'ec2-user' do
             puts `uname`
@@ -122,7 +122,7 @@ describe 'Cronicle::Client#exec' do
     end
 
     it do
-      expect(amzn_out).to eq <<-EOS.undent
+      expect(amzn_out).to eq <<-EOS.unindent
         foo on amazon_linux/ec2-user> Execute job
         foo on amazon_linux/ec2-user> Linux
         foo on amazon_linux/ec2-user> ec2-user
@@ -130,7 +130,7 @@ describe 'Cronicle::Client#exec' do
     end
 
     it do
-      expect(ubuntu_out).to eq <<-EOS.undent
+      expect(ubuntu_out).to eq <<-EOS.unindent
         foo on ubuntu/ubuntu> Execute job
         foo on ubuntu/ubuntu> Linux
         foo on ubuntu/ubuntu> ubuntu
@@ -140,7 +140,7 @@ describe 'Cronicle::Client#exec' do
 
   context 'jon is not defined' do
     let(:jobfile) do
-      <<-RUBY.undent
+      <<-RUBY.unindent
         on servers: /.*/ do
           job :foo, user: :root do
             puts `uname`

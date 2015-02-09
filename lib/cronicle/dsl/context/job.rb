@@ -45,14 +45,14 @@ class Cronicle::DSL::Context::Job
 
     if block
       source = block.to_raw_source(:strip_enclosure => true).each_line.to_a
-      source = source.shift + source.join.undent
+      source = source.shift + source.join.unindent
 
       job_hash[:content] = <<-RUBY
 #!/usr/bin/env ruby
 #{source}
       RUBY
     else
-      job_hash[:content] = opts[:content].to_s.undent
+      job_hash[:content] = opts[:content].to_s.unindent
     end
   end
 end
