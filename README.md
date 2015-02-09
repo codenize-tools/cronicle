@@ -38,6 +38,7 @@ Options:
       [--ask-pass], [--no-ask-pass]    # Ask sudo password
       [--dry-run], [--no-dry-run]      # Do not actually change
   -c, [--ssh-config=SSH-CONFIG]        # OpenSSH configuration file
+      [--ssh-options=SSH-OPTIONS]      # SSH options (JSON)
       [--connection-timeout=N]         # SSH connection timeout
       [--concurrency=N]                # SSH concurrency
                                        # Default: 10
