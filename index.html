@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Cronicle : It is a tool for execute script, and define cron on remote hosts.">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Cronicle</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/winebarrel/cronicle">View on GitHub</a>
+
+          <h1 id="project_title">Cronicle</h1>
+          <h2 id="project_tagline">It is a tool for execute script, and define cron on remote hosts.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/winebarrel/cronicle/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/winebarrel/cronicle/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p><a href="http://badge.fury.io/rb/cronicle"><img src="https://badge.fury.io/rb/cronicle.svg" alt="Gem Version"></a>
+<a href="https://travis-ci.org/winebarrel/cronicle"><img src="https://travis-ci.org/winebarrel/cronicle.svg?branch=master" alt="Build Status"></a></p>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Add this line to your application's Gemfile:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="pl-k">gem</span> <span class="pl-s1"><span class="pl-pds">'</span>cronicle<span class="pl-pds">'</span></span></pre></div>
+
+<p>And then execute:</p>
+
+<pre><code>$ bundle
+</code></pre>
+
+<p>Or install it yourself as:</p>
+
+<pre><code>$ gem install cronicle
+</code></pre>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<pre><code>Commands:
+  cronicle apply           # Apply cron jobs to remote hosts
+  cronicle exec JOB_NAME   # Execute a job on remote hosts
+  cronicle help [COMMAND]  # Describe available commands or one specific command
+
+Options:
+  -f, [--file=FILE]                    # Job definition file
+                                       # Default: Jobfile
+  -h, [--hosts=HOSTS]                  # Hosts definition file
+  -r, [--target-roles=one two three]   # Target host role list
+  -p, [--sudo-password=SUDO-PASSWORD]  # Sudo password
+      [--ask-pass], [--no-ask-pass]    # Ask sudo password
+      [--dry-run], [--no-dry-run]      # Do not actually change
+  -c, [--ssh-config=SSH-CONFIG]        # OpenSSH configuration file
+      [--ssh-options=SSH-OPTIONS]      # SSH options (JSON)
+      [--connection-timeout=N]         # SSH connection timeout
+      [--concurrency=N]                # SSH concurrency
+                                       # Default: 10
+      [--libexec=LIBEXEC]              # Cronicle libexec path
+                                       # Default: /var/lib/cronicle/libexec
+  -v, [--verbose], [--no-verbose]      # Verbose mode
+      [--debug], [--no-debug]          # Debug mode
+      [--color], [--no-color]          # Colorize log
+                                       # Default: true
+</code></pre>
+
+<h2>
+<a id="quick-start" class="anchor" href="#quick-start" aria-hidden="true"><span class="octicon octicon-link"></span></a>Quick Start</h2>
+
+<div class="highlight highlight-sh"><pre>$ cat Jobfile
+on servers: :your_hostname <span class="pl-k">do</span>
+  job :my_job, user: <span class="pl-s1"><span class="pl-pds">"</span>ec2-user<span class="pl-pds">"</span></span>, schedule: <span class="pl-s1"><span class="pl-pds">"</span>* * * * *<span class="pl-pds">"</span></span> <span class="pl-k">do</span>
+    puts <span class="pl-s1"><span class="pl-pds">"</span>hello<span class="pl-pds">"</span></span>
+  end
+end
+
+$ cronicle <span class="pl-s3">exec</span> my_job
+my_job on your_hostname/ec2-user<span class="pl-k">&gt;</span> Execute job
+my_job on your_hostname/ec2-user<span class="pl-k">&gt;</span> hello
+
+$ cronicle apply --dry-run
+my_job on your_hostname/ec2-user<span class="pl-k">&gt;</span> Create job: schedule=<span class="pl-s1"><span class="pl-pds">"</span>* * * * *<span class="pl-pds">"</span></span> (dry-run)
+
+$ cronicle apply
+my_job on your_hostname/ec2-user<span class="pl-k">&gt;</span> Create job: schedule=<span class="pl-s1"><span class="pl-pds">"</span>* * * * *<span class="pl-pds">"</span></span>
+
+$ ssh your_hostname <span class="pl-s1"><span class="pl-pds">'</span>crontab -l<span class="pl-pds">'</span></span>
+<span class="pl-k">*</span> <span class="pl-k">*</span> <span class="pl-k">*</span> <span class="pl-k">*</span> <span class="pl-k">*</span> /var/lib/cronicle/libexec/ec2-user/my_job <span class="pl-k">2&gt;&amp;1</span> <span class="pl-k">|</span> logger -t cronicle/ec2-user/my_job
+
+$ ssh your_hostname <span class="pl-s1"><span class="pl-pds">'</span>cat /var/lib/cronicle/libexec/ec2-user/my_job<span class="pl-pds">'</span></span>
+<span class="pl-c">#!/usr/bin/env ruby</span>
+puts <span class="pl-s1"><span class="pl-pds">"</span>hello<span class="pl-pds">"</span></span></pre></div>
+
+<h2>
+<a id="jobfile-example" class="anchor" href="#jobfile-example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Jobfile example</h2>
+
+<div class="highlight highlight-ruby"><pre>on <span class="pl-c1">servers:</span> <span class="pl-c1">:your_hostname</span> <span class="pl-k">do</span>
+  job <span class="pl-c1">:my_job</span>, <span class="pl-c1">user:</span> <span class="pl-s1"><span class="pl-pds">"</span>ec2-user<span class="pl-pds">"</span></span>, <span class="pl-c1">schedule:</span> <span class="pl-s1"><span class="pl-pds">"</span>* * * * *<span class="pl-pds">"</span></span> <span class="pl-k">do</span>
+    puts <span class="pl-s1"><span class="pl-pds">"</span>hello<span class="pl-pds">"</span></span>
+  <span class="pl-k">end</span>
+
+  job <span class="pl-c1">:my_job2</span>, <span class="pl-c1">user:</span> <span class="pl-s1"><span class="pl-pds">"</span>ec2-user<span class="pl-pds">"</span></span>, <span class="pl-c1">schedule:</span> <span class="pl-s1"><span class="pl-pds">"</span>* * * * *<span class="pl-pds">"</span></span>, <span class="pl-c1">content:</span> <span class="pl-s1"><span class="pl-pds">&lt;&lt;-EOS</span></span>
+<span class="pl-s1">    #!/bin/sh</span>
+<span class="pl-s1">    echo hello</span>
+<span class="pl-s1"><span class="pl-pds">  EOS</span></span>
+<span class="pl-k">end</span></pre></div>
+
+<h2>
+<a id="hosts-definition-file" class="anchor" href="#hosts-definition-file" aria-hidden="true"><span class="octicon octicon-link"></span></a>Hosts definition file</h2>
+
+<p>Any of the following formats:</p>
+
+<pre><code>server1,server2,...
+</code></pre>
+
+<pre><code>server1
+server2
+...
+</code></pre>
+
+<div class="highlight highlight-javascript"><pre>{
+  <span class="pl-s1"><span class="pl-pds">"</span>servers<span class="pl-pds">"</span></span><span class="pl-k">:</span> {
+    <span class="pl-s1"><span class="pl-pds">"</span>server1<span class="pl-pds">"</span></span><span class="pl-k">:</span> [<span class="pl-s1"><span class="pl-pds">"</span>web<span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>app<span class="pl-pds">"</span></span>]
+    <span class="pl-s1"><span class="pl-pds">"</span>server2<span class="pl-pds">"</span></span><span class="pl-k">:</span> [<span class="pl-s1"><span class="pl-pds">"</span>db<span class="pl-pds">"</span></span>]
+  }
+}</pre></div>
+
+<div class="highlight highlight-javascript"><pre>{
+  <span class="pl-s1"><span class="pl-pds">"</span>roles<span class="pl-pds">"</span></span><span class="pl-k">:</span> {
+    <span class="pl-s1"><span class="pl-pds">"</span>web<span class="pl-pds">"</span></span><span class="pl-k">:</span> [<span class="pl-s1"><span class="pl-pds">"</span>server1<span class="pl-pds">"</span></span>],
+    <span class="pl-s1"><span class="pl-pds">"</span>app<span class="pl-pds">"</span></span><span class="pl-k">:</span> [<span class="pl-s1"><span class="pl-pds">"</span>server1<span class="pl-pds">"</span></span>],
+    <span class="pl-s1"><span class="pl-pds">"</span>db<span class="pl-pds">"</span></span><span class="pl-k">:</span> [<span class="pl-s1"><span class="pl-pds">"</span>server2<span class="pl-pds">"</span></span>]
+  }
+}</pre></div>
+
+<p>Hosts definition file is not required.</p>
+
+<p>If you pass <code>--hosts</code> options, can be defined as follows in Jobfile:</p>
+
+<div class="highlight highlight-ruby"><pre>on <span class="pl-c1">servers:</span> <span class="pl-sr"><span class="pl-pds">/</span>any_host<span class="pl-pds">/</span></span> <span class="pl-k">do </span><span class="pl-c"># use regexp</span>
+  job <span class="pl-c1">:foo</span>, <span class="pl-c1">user:</span> <span class="pl-s1"><span class="pl-pds">"</span>ec2-user<span class="pl-pds">"</span></span>, <span class="pl-c1">schedule:</span> <span class="pl-s1"><span class="pl-pds">"</span>* * * * *<span class="pl-pds">"</span></span> <span class="pl-k">do</span>
+    <span class="pl-c1">3</span>.times <span class="pl-k">do</span>
+      puts <span class="pl-s1"><span class="pl-pds">"</span>hello<span class="pl-pds">"</span></span>
+    <span class="pl-k">end</span>
+  <span class="pl-k">end</span>
+<span class="pl-k">end</span>
+
+on <span class="pl-c1">roles:</span> <span class="pl-s1"><span class="pl-pds">"</span>web<span class="pl-pds">"</span></span> <span class="pl-k">do </span><span class="pl-c"># use role</span>
+  job <span class="pl-c1">:my_job</span>, <span class="pl-c1">user:</span> <span class="pl-s1"><span class="pl-pds">"</span>ec2-user<span class="pl-pds">"</span></span>, <span class="pl-c1">schedule:</span> <span class="pl-s1"><span class="pl-pds">"</span>* * * * *<span class="pl-pds">"</span></span> <span class="pl-k">do</span>
+    puts <span class="pl-s1"><span class="pl-pds">"</span>hello<span class="pl-pds">"</span></span>
+  <span class="pl-k">end</span>
+<span class="pl-k">end</span></pre></div>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Cronicle maintained by <a href="https://github.com/winebarrel">winebarrel</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
