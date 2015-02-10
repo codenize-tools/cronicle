@@ -205,8 +205,8 @@ describe 'Cronicle::Client#exec' do
       expect(ubuntu_out).to eq <<-EOS.unindent
         foo on ubuntu/ubuntu> Execute job
         foo on ubuntu/ubuntu>\s
-        foo on ubuntu/ubuntu> Linux
-        foo on ubuntu/ubuntu> ubuntu
+        foo on ubuntu/ubuntu> "My Mash on ubuntu"
+        foo on ubuntu/ubuntu> true
       EOS
     end
   end
