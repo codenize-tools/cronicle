@@ -5,10 +5,11 @@ class Cronicle::CLI < Thor
   class_option 'hosts',              :aliases => '-h', :desc => 'Hosts definition file'
   class_option 'target-roles',       :aliases => '-r', :desc => 'Target host role list',      :type => :array
   class_option 'sudo-password',      :aliases => '-p', :desc => 'Sudo password'
+  class_option 'ssh-user',                             :desc => 'SSH login user',             :default => ENV['CRONICLE_SSH_USER']
   class_option 'ask-pass',                             :desc => 'Ask sudo password',          :type => :boolean, :default => false
   class_option 'dry-run',                              :desc => 'Do not actually change',     :type => :boolean, :default => false
-  class_option 'ssh-config',         :aliases => '-c', :desc => 'OpenSSH configuration file', :default => nil
-  class_option 'ssh-options',                          :desc => 'SSH options (JSON)',         :default => nil
+  class_option 'ssh-config',         :aliases => '-c', :desc => 'OpenSSH configuration file', :default => (ENV['CRONICLE_SSH_CONFIG'] || '~/.ssh/config')
+  class_option 'ssh-options',                          :desc => 'SSH options (JSON)',         :default => ENV['CRONICLE_SSH_OPTIONS']
   class_option 'connection-timeout',                   :desc => 'SSH connection timeout',     :type => :numeric, :default => nil
   class_option 'concurrency',                          :desc => 'SSH concurrency',            :type => :numeric, :default => Cronicle::Client::DEFAULTS[:concurrency]
   class_option 'libexec',                              :desc => 'Cronicle libexec path',      :default => Cronicle::Client::DEFAULTS[:libexec]
@@ -82,6 +83,7 @@ class Cronicle::CLI < Thor
   def client_options
     client_opts = {
       :sudo_password => options['sudo-password'],
+      :ssh_user => options['ssh-user'],
       :concurrency => options['concurrency'],
       :libexec => options['libexec'],
       :dry_run => options['dry-run'],
@@ -112,7 +114,12 @@ class Cronicle::CLI < Thor
       end
     end
 
-    ssh_options[:config] = options['ssh-config'] if options['ssh-config']
+    ssh_config = options['ssh-config']
+
+    if ssh_config
+      ssh_config = File.expand_path(ssh_config)
+      ssh_options[:config] = ssh_config if File.exist?(ssh_config)
+    end
 
     SSHKit::Backend::Netssh.configure do |ssh|
       ssh.connection_timeout = conn_timeout if conn_timeout
