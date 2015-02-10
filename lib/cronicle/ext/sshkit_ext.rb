@@ -77,11 +77,17 @@ class SSHKit::Backend::Netssh
     sudo(:execute, :sed, '-i', sed_cmd, user_crontab(user), :raise_on_non_zero_exit => false)
   end
 
-  def add_cron_entry(user, name, schedule, temp_dir)
+  def add_cron_entry(user, name, schedule, temp_dir, bundle_gems = nil)
     script = script_path(user, name)
     temp_entry = [temp_dir, name + '.entry'].join('/')
 
-    cron_entry = "#{schedule}\\t#{script} 2>&1 | logger -t cronicle/#{user}/#{name}"
+    cron_entry = "#{schedule}\\t"
+
+    if bundle_gems
+      cron_entry << "cd #{gemfile_dir(user, name)} && #{bundler_path} exec "
+    end
+
+    cron_entry << "#{script} 2>&1 | logger -t cronicle/#{user}/#{name}"
     cron_entry = Shellwords.shellescape(cron_entry)
     sudo(:execute, :echo, '-e', cron_entry, '>', temp_entry)
 

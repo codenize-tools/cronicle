@@ -37,7 +37,7 @@ class Cronicle::Exporter
     crontab.each_line.map(&:strip).each do |line|
       next if line =~ /\A#/
 
-      md = line.match(/\A(@\w+|\S+(?:\s+\S+){4})\s+(.\S+)(.*)\z/)
+      md = line.match(/\A(@\w+|\S+(?:\s+\S+){4})\s+(?:cd\s+\S+\s+&&\s+\S*bundle\s+exec\s+)?(.\S+)(.*)\z/)
       schedule, path, extra = md.captures if md
 
       if %r|\A#{Regexp.escape(libexec_dir)}/(?:[^/]+)/(.+)| =~ path

@@ -92,12 +92,26 @@ class Cronicle::Driver
   end
 
   def create_job(user, name, job)
+    execute do
+      if job[:bundle]
+        mkgemfile(user, name, job[:bundle])
+        bundle(user, name)
+      end
+    end
+
     create_or_update_job(user, name, job)
   end
 
   def update_job(user, name, job, script)
     job_content = job[:content].chomp
     script_content = script[:content].chomp
+
+    execute do
+      if job[:bundle]
+        mkgemfile(user, name, job[:bundle])
+        bundle(user, name)
+      end
+    end
 
     if [:schedule, :content].any? {|k| job[k].chomp != script[k].chomp }
       create_or_update_job(user, name, job, script)
@@ -127,7 +141,7 @@ class Cronicle::Driver
             sudo(:execute, :cp, temp_script, libexec_script)
             sudo(:execute, :touch, user_crontab(user))
             delete_cron_entry(user, name)
-            add_cron_entry(user, name, job[:schedule], user_temp_dir)
+            add_cron_entry(user, name, job[:schedule], user_temp_dir, job[:bundle])
           end
         end
       end
@@ -148,6 +162,7 @@ class Cronicle::Driver
           unless host.options[:dry_run]
             delete_cron_entry(user, name)
             sudo(:execute, :rm, '-f', script[:path], :raise_on_non_zero_exit => false)
+            sudo(:execute, :rm, '-rf', gemfile_dir(user, name), :raise_on_non_zero_exit => false)
           end
         end
       end
