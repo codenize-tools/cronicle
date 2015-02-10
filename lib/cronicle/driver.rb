@@ -58,10 +58,10 @@ class Cronicle::Driver
             command = nil
 
             if job[:bundle]
-              mkgemfile(user, name, job[:bundle])
-              bundle(user, name)
+              mkgemfile(user, name, job[:bundle], temp_dir)
+              bundle(user, name, temp_dir)
 
-              with_bundle(user, name) do
+              with_bundle(user, name, temp_dir) do
                 command = sudo(:_execute, bundler_path, :exec, temp_script, exec_opts)
               end
             else

@@ -123,11 +123,11 @@ class SSHKit::Backend::Netssh
     end
   end
 
-  def mkgemfile(user, name, bundle_gems)
-    sudo(:execute, :mkdir, '-p', gemfile_dir(user, name))
+  def mkgemfile(user, name, bundle_gems, temp_dir = nil)
+    sudo(:execute, :mkdir, '-p', gemfile_dir(user, name, temp_dir))
     sudo(:execute, :bash, '-c',
       Shellwords.shellescape(
-        [:echo, Shellwords.shellescape("source 'https://rubygems.org'"), '>', gemfile(user, name)].join(' ')
+        [:echo, Shellwords.shellescape("source 'https://rubygems.org'"), '>', gemfile(user, name, temp_dir)].join(' ')
       )
     )
 
@@ -136,23 +136,23 @@ class SSHKit::Backend::Netssh
       line << ", '#{version}'" if version
       sudo(:execute, :bash, '-c',
         Shellwords.shellescape(
-          [:echo, Shellwords.shellescape(line), '>>', gemfile(user, name)].join(' ')
+          [:echo, Shellwords.shellescape(line), '>>', gemfile(user, name, temp_dir)].join(' ')
         )
       )
     end
   end
 
-  def bundle(user, name)
-    with_bundle(user, name) do |bundler_opts|
+  def bundle(user, name, temp_dir = nil)
+    with_bundle(user, name, temp_dir) do |bundler_opts|
       unless sudo(:execute, bundler_path, :check, *bundler_opts, :raise_on_non_zero_exit => false)
         sudo(:execute, bundler_path, :install, *bundler_opts)
       end
     end
   end
 
-  def with_bundle(user, name)
-    within gemfile_dir(user, name) do
-      bundler_opts = ['--no-color', '--gemfile', gemfile(user, name), '--path', bundle_dir]
+  def with_bundle(user, name, temp_dir = nil)
+    within gemfile_dir(user, name, temp_dir) do
+      bundler_opts = ['--no-color', '--gemfile', gemfile(user, name, temp_dir), '--path', bundle_dir]
       yield(bundler_opts)
     end
   end
@@ -188,12 +188,16 @@ class SSHKit::Backend::Netssh
     [run_dir, user].join('/')
   end
 
-  def gemfile_dir(user, name)
-    [user_run_dir(user), name].join('/')
+  def gemfile_dir(user, name, temp_dir = nil)
+    if temp_dir
+      [temp_dir, user, name].join('/')
+    else
+      [user_run_dir(user), name].join('/')
+    end
   end
 
-  def gemfile(user, name)
-    [gemfile_dir(user, name), 'Gemfile'].join('/')
+  def gemfile(user, name, temp_dir = nil)
+    [gemfile_dir(user, name, temp_dir), 'Gemfile'].join('/')
   end
 
   def user_crontab(user)
