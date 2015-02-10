@@ -50,6 +50,15 @@ def get_crontabs
   }.flatten]
 end
 
+def get_gemfiles
+  gemfiles = Specinfra.backend.run_command("ls /var/lib/cronicle/run/*/*/Gemfile 2> /dev/null").stdout.strip.split(/\s+/)
+
+  Hash[*gemfiles.map {|gemfile|
+    content = Specinfra.backend.run_command("cat #{gemfile}").stdout
+    [gemfile, content]
+  }.flatten]
+end
+
 def get_file(path)
   Specinfra.backend.run_command("cat #{path}").stdout
 end
