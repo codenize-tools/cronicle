@@ -206,6 +206,165 @@ ZOO=baz
     end
   end
 
+  context 'when cron is deleted with bundle' do
+    let(:jobfile) do
+      <<-RUBY.unindent
+        on servers: /.*/ do
+          job :foo, user: :root, schedule: '1 2 * * *', bundle: 'ruby-mysql' do
+            require 'mysql'
+            p Mysql
+          end
+        end
+      RUBY
+    end
+
+    let(:amzn_crontab_orig) do
+      {
+        "/var/spool/cron/ec2-user" =>
+"FOO=bar
+ZOO=baz
+1 1 1 1 1 echo ec2-user > /dev/null
+",
+        "/var/spool/cron/root" =>
+"FOO=bar
+ZOO=baz
+1 1 1 1 1 echo root > /dev/null
+1 2 * * *\tcd /var/lib/cronicle/run/root/foo && /usr/local/bin/bundle exec /var/lib/cronicle/libexec/root/foo 2>&1 | logger -t cronicle/root/foo
+"
+      }
+    end
+
+    let(:amzn_gemfile_orig) do
+      {
+        "/var/lib/cronicle/run/root/foo/Gemfile" =>
+"source 'https://rubygems.org'
+gem 'ruby-mysql'
+"
+      }
+    end
+
+    let(:ubuntu_crontab_orig) do
+      {
+        "/var/spool/cron/crontabs/root" =>
+"FOO=bar
+ZOO=baz
+1 1 1 1 1 echo root > /dev/null
+1 2 * * *\tcd /var/lib/cronicle/run/root/foo && /usr/local/bin/bundle exec /var/lib/cronicle/libexec/root/foo 2>&1 | logger -t cronicle/root/foo
+",
+        "/var/spool/cron/crontabs/ubuntu" =>
+"FOO=bar
+ZOO=baz
+1 1 1 1 1 echo ubuntu > /dev/null
+"
+      }
+    end
+
+    let(:ubuntu_gemfile_orig) do
+      {
+        "/var/lib/cronicle/run/root/foo/Gemfile" =>
+"source 'https://rubygems.org'
+gem 'ruby-mysql'
+"
+      }
+    end
+
+    let(:amzn_crontab) do
+      {
+        "/var/spool/cron/ec2-user" =>
+"FOO=bar
+ZOO=baz
+1 1 1 1 1 echo ec2-user > /dev/null
+",
+        "/var/spool/cron/root" =>
+"FOO=bar
+ZOO=baz
+1 1 1 1 1 echo root > /dev/null
+1 2 * * *\tcd /var/lib/cronicle/run/root/foo && /usr/local/bin/bundle exec /var/lib/cronicle/libexec/root/foo 2>&1 | logger -t cronicle/root/foo
+"
+      }
+    end
+
+    let(:amzn_gemfile) do
+      {
+        "/var/lib/cronicle/run/root/foo/Gemfile" =>
+"source 'https://rubygems.org'
+gem 'ruby-mysql'
+"
+      }
+    end
+
+    let(:ubuntu_crontab) do
+      {
+        "/var/spool/cron/crontabs/root" =>
+"FOO=bar
+ZOO=baz
+1 1 1 1 1 echo root > /dev/null
+1 2 * * *\tcd /var/lib/cronicle/run/root/foo && /usr/local/bin/bundle exec /var/lib/cronicle/libexec/root/foo 2>&1 | logger -t cronicle/root/foo
+",
+        "/var/spool/cron/crontabs/ubuntu" =>
+"FOO=bar
+ZOO=baz
+1 1 1 1 1 echo ubuntu > /dev/null
+"
+      }
+    end
+
+    let(:ubuntu_gemfile) do
+      {
+        "/var/lib/cronicle/run/root/foo/Gemfile" =>
+"source 'https://rubygems.org'
+gem 'ruby-mysql'
+"
+      }
+    end
+
+    before do
+      cronicle(:apply) { jobfile }
+    end
+
+    it do
+      on :amazon_linux do
+        expect(get_uname).to match /amzn/
+        expect(get_crontabs).to eq amzn_crontab_orig
+
+        expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.unindent
+          #!/usr/bin/env ruby
+          require 'mysql'
+          p Mysql
+        EOS
+
+        expect(get_gemfiles).to eq amzn_gemfile_orig
+      end
+
+      on :ubuntu do
+        expect(get_uname).to match /Ubuntu/
+        expect(get_crontabs).to eq ubuntu_crontab_orig
+
+        expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.unindent
+          #!/usr/bin/env ruby
+          require 'mysql'
+          p Mysql
+        EOS
+
+        expect(get_gemfiles).to eq ubuntu_gemfile_orig
+      end
+
+      cronicle(:apply) { '' }
+
+      on :amazon_linux do
+        expect(get_uname).to match /amzn/
+        expect(get_crontabs).to eq amzn_crontab
+        expect(get_gemfiles).to eq amzn_gemfile
+      end
+
+      on :ubuntu do
+        expect(get_uname).to match /Ubuntu/
+        expect(get_crontabs).to eq ubuntu_crontab
+        expect(get_gemfiles).to eq ubuntu_gemfile
+      end
+    end
+  end
+
   context 'when cron is deleted (dry-run)' do
     let(:amzn_crontab) do
       {

@@ -272,10 +272,6 @@ ZOO=baz
 
       let(:amzn_gemfile) do
         {
-          "/var/lib/cronicle/run/ec2-user/foo/Gemfile" =>
-"source 'https://rubygems.org'
-gem 'ruby-mysql'
-",
           "/var/lib/cronicle/run/root/foo/Gemfile" =>
 "source 'https://rubygems.org'
 gem 'ruby-mysql'

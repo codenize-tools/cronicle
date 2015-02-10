@@ -104,6 +104,7 @@ RSpec.configure do |config|
 
     on :amazon_linux do
       Specinfra.backend.run_command("gem install bundler")
+      Specinfra.backend.run_command("rm -rf /var/lib/cronicle/run")
     end
   end
 
