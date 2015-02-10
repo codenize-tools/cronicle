@@ -25,7 +25,7 @@ class Cronicle::Client
     end
 
     parallel_each(jobs_by_host) do |host, jobs_by_user|
-      if @options[:ssh_user]
+      if @options[:ssh_user] and host !~ /@/
         host = @options[:ssh_user] + '@' + host
       end
 
