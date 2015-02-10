@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ['sgwr_dts@yahoo.co.jp']
   spec.summary       = %q{It is a tool for execute script, and define cron on remote hosts.}
   spec.description   = %q{It is a tool for execute script, and define cron on remote hosts.}
-  spec.homepage      = 'https://github.com/winebarrel/cronicle'
+  spec.homepage      = 'http://cronicle.codenize.tools/'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0")
