@@ -3,7 +3,7 @@ class Cronicle::Client
 
   DEFAULTS = {
     :concurrency => 10,
-    :libexec => '/var/lib/cronicle/libexec'
+    :var_dir => '/var/lib/cronicle'
   }
 
   def initialize(host_list, options = {})

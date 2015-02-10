@@ -32,7 +32,7 @@ class Cronicle::Exporter
 
   def parse_crontab(crontab, libexec_contents)
     scripts = {}
-    libexec_dir = @options.fetch(:libexec)
+    libexec_dir = @options.fetch(:var_dir) + '/libexec'
 
     crontab.each_line.map(&:strip).each do |line|
       next if line =~ /\A#/

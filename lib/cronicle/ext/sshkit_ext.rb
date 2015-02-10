@@ -118,7 +118,7 @@ class SSHKit::Backend::Netssh
   end
 
   def libexec_dir
-    host.options.fetch(:libexec)
+    host.options.fetch(:var_dir) + '/libexec'
   end
 
   def user_libexec_dir(user)
