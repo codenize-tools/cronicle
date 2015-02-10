@@ -162,4 +162,52 @@ describe 'Cronicle::Client#exec' do
       }.to raise_error('Definition cannot be found: Job `bar`')
     end
   end
+
+  context 'with bundle' do
+    let(:jobfile) do
+      <<-RUBY.unindent
+        on servers: /amazon_linux/ do
+          job :foo, user: 'ec2-user', bundle: 'hashie' do
+            require 'hashie'
+            mash = Hashie::Mash.new
+            mash.name = "My Mash on amazon_linux"
+            p mash.name
+            p mash.name?
+          end
+        end
+
+        on servers: /ubuntu/ do
+          job :foo, user: :ubuntu, bundle: 'hashie' do
+            require 'hashie'
+            mash = Hashie::Mash.new
+            mash.name = "My Mash on ubuntu"
+            p mash.name
+            p mash.name?
+          end
+        end
+      RUBY
+    end
+
+    before do
+      cronicle(:exec, :foo, logger: logger) { jobfile }
+    end
+
+    it do
+      expect(amzn_out).to eq <<-EOS.unindent
+        foo on amazon_linux/ec2-user> Execute job
+        foo on amazon_linux/ec2-user>\s
+        foo on amazon_linux/ec2-user> "My Mash on amazon_linux"
+        foo on amazon_linux/ec2-user> true
+      EOS
+    end
+
+    it do
+      expect(ubuntu_out).to eq <<-EOS.unindent
+        foo on ubuntu/ubuntu> Execute job
+        foo on ubuntu/ubuntu>\s
+        foo on ubuntu/ubuntu> Linux
+        foo on ubuntu/ubuntu> ubuntu
+      EOS
+    end
+  end
 end
