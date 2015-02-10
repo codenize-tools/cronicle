@@ -9,7 +9,7 @@ class SSHKit::Backend::Netssh
 
     retval = with_sudo_password(host.options[:sudo_password] || '') do
       with_sudo = [:sudo, '-p', SUDO_PROMPT, '-S']
-      with_sudo << '-u' << opts[:user] if opts[:user]
+      with_sudo << :sudo << '-u' << opts[:user] if opts[:user]
       with_sudo.concat(args)
 
       raise_on_non_zero_exit = opts.fetch(:raise_on_non_zero_exit, true)
