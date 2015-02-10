@@ -96,7 +96,7 @@ def on(*hosts)
 end
 
 RSpec.configure do |config|
-  config.before(:each) do
+  config.before(:all) do
     on :ubuntu do
       Specinfra.backend.run_command("apt-get -y install ruby")
       Specinfra.backend.run_command("gem install bundler")
@@ -104,7 +104,6 @@ RSpec.configure do |config|
 
     on :amazon_linux do
       Specinfra.backend.run_command("gem install bundler")
-      Specinfra.backend.run_command("rm -rf /var/lib/cronicle/run")
     end
   end
 
@@ -112,6 +111,7 @@ RSpec.configure do |config|
     on TARGET_HOSTS do
       cron_dir = get_cron_dir
       Specinfra.backend.run_command("rm -f #{cron_dir}/*")
+      Specinfra.backend.run_command("rm -rf /var/lib/cronicle/run")
     end
   end
 end
