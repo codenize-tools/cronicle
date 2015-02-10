@@ -18,3 +18,4 @@ Jobfile
 *.pem
 *.bak
 /_site
+ssh_config

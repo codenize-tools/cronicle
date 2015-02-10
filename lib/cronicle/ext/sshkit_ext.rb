@@ -91,7 +91,7 @@ class SSHKit::Backend::Netssh
   end
 
   def upload_script(temp_dir, name, content)
-    temp_script = [temp_dir, name].join
+    temp_script = [temp_dir, name].join('/')
     upload!(StringIO.new(content), temp_script)
     execute(:chmod, 755, temp_script)
     yield(temp_script)
@@ -113,7 +113,41 @@ class SSHKit::Backend::Netssh
 
       yield(*block_args)
     ensure
-      execute(:rm, '-rf', temp_dir, :raise_on_non_zero_exit => false) rescue nil
+      sudo(:execute, :rm, '-rf', temp_dir, :raise_on_non_zero_exit => false) rescue nil
+    end
+  end
+
+  def mkgemfile(user, name, bundle_gems)
+    sudo(:execute, :mkdir, '-p', gemfile_dir(user, name))
+    sudo(:execute, :bash, '-c',
+      Shellwords.shellescape(
+        [:echo, Shellwords.shellescape("source 'https://rubygems.org'"), '>', gemfile(user, name)].join(' ')
+      )
+    )
+
+    bundle_gems.each do |gem_name, version|
+      line = "gem '#{gem_name}'"
+      line << ", '#{version}'" if version
+      sudo(:execute, :bash, '-c',
+        Shellwords.shellescape(
+          [:echo, Shellwords.shellescape(line), '>>', gemfile(user, name)].join(' ')
+        )
+      )
+    end
+  end
+
+  def bundle(user, name)
+    with_bundle(user, name) do |bundler_opts|
+      unless sudo(:execute, bundler_path, :check, *bundler_opts, :raise_on_non_zero_exit => false)
+        sudo(:execute, bundler_path, :install, *bundler_opts)
+      end
+    end
+  end
+
+  def with_bundle(user, name)
+    within gemfile_dir(user, name) do
+      bundler_opts = ['--no-color', '--gemfile', gemfile(user, name), '--path', bundle_dir]
+      yield(bundler_opts)
     end
   end
 
@@ -121,8 +155,39 @@ class SSHKit::Backend::Netssh
     host.options.fetch(:var_dir) + '/libexec'
   end
 
+  def run_dir
+    host.options.fetch(:var_dir) + '/run'
+  end
+
+  def bundle_dir
+    host.options.fetch(:var_dir) + '/bundle'
+  end
+
+  BUNDLER_PATHS = %w(
+    /usr/local/bin/bundle
+    /usr/bin/bundle
+  )
+
+  def bundler_path
+    @bundler_path ||= (BUNDLER_PATHS.find {|path|
+      execute(:test, '-f', path, :raise_on_non_zero_exit => false)
+    } || :bundle)
+  end
+
   def user_libexec_dir(user)
     [libexec_dir, user].join('/')
+  end
+
+  def user_run_dir(user)
+    [run_dir, user].join('/')
+  end
+
+  def gemfile_dir(user, name)
+    [user_run_dir(user), name].join('/')
+  end
+
+  def gemfile(user, name)
+    [gemfile_dir(user, name), 'Gemfile'].join('/')
   end
 
   def user_crontab(user)

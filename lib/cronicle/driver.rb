@@ -54,7 +54,20 @@ class Cronicle::Driver
           end
 
           upload_script(temp_dir, name, job[:content]) do |temp_script|
-            command = sudo(:_execute, temp_script, :user => user, :raise_on_non_zero_exit => false)
+            exec_opts = {:user => user, :raise_on_non_zero_exit => false}
+            command = nil
+
+            if job[:bundle]
+              mkgemfile(user, name, job[:bundle])
+              bundle(user, name)
+
+              with_bundle(user, name) do
+                command = sudo(:_execute, bundler_path, :exec, temp_script, exec_opts)
+              end
+            else
+              command = sudo(:_execute, temp_script, exec_opts)
+            end
+
             out = command.full_stdout
             Cronicle::Utils.remove_prompt!(out)
             host_user_job = {:host => host.hostname, :user => user, :job => name}

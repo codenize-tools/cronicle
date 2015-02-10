@@ -30,7 +30,7 @@ class Cronicle::DSL::Context::Job
       raise ArgumentError, "Job `#{name}`: :user is required"
     end
 
-    opts.assert_valid_keys(:schedule, :user, :content)
+    opts.assert_valid_keys(:schedule, :user, :content, :bundle)
 
     if opts[:content] and block
       raise ArgumentError, 'Can not pass :content and block to `job` method'
@@ -42,6 +42,11 @@ class Cronicle::DSL::Context::Job
     job_hash[:name] = name
     job_hash[:user] = opts.fetch(:user).to_s
     job_hash[:schedule] = opts[:schedule].to_s if opts[:schedule]
+    bundle = opts[:bundle]
+
+    if bundle
+      job_hash[:bundle] = bundle.kind_of?(Hash) ? bundle : Array(bundle).map(&:to_s)
+    end
 
     if block
       source = block.to_raw_source(:strip_enclosure => true).each_line.to_a

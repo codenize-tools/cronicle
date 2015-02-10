@@ -90,6 +90,11 @@ RSpec.configure do |config|
   config.before(:each) do
     on :ubuntu do
       Specinfra.backend.run_command("apt-get -y install ruby")
+      Specinfra.backend.run_command("gem install bundler")
+    end
+
+    on :amazon_linux do
+      Specinfra.backend.run_command("gem install bundler")
     end
   end
 
