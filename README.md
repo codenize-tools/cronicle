@@ -39,13 +39,13 @@ Options:
       [--ask-pass], [--no-ask-pass]    # Ask sudo password
       [--dry-run], [--no-dry-run]      # Do not actually change
   -c, [--ssh-config=SSH-CONFIG]        # OpenSSH configuration file
-                                       # Default: ~/.ssh/config
+                                       # Default: ssh_config
       [--ssh-options=SSH-OPTIONS]      # SSH options (JSON)
       [--connection-timeout=N]         # SSH connection timeout
       [--concurrency=N]                # SSH concurrency
                                        # Default: 10
-      [--libexec=LIBEXEC]              # Cronicle libexec path
-                                       # Default: /var/lib/cronicle/libexec
+      [--var-dir=VAR-DIR]              # Cronicle var dir path
+                                       # Default: /var/lib/cronicle
   -v, [--verbose], [--no-verbose]      # Verbose mode
       [--debug], [--no-debug]          # Debug mode
       [--color], [--no-color]          # Colorize log
@@ -90,8 +90,12 @@ puts "hello"
 
 ```ruby
 on servers: :your_hostname do
-  job :my_job, user: "ec2-user", schedule: "* * * * *" do
-    puts "hello"
+  job :my_job, user: "ec2-user", schedule: "* * * * *", bundle: 'ruby-mysql' do
+    require 'mysql'
+    my = Mysql.connect('hostname', 'username', 'password', 'dbname')
+    my.query("select col1, col2 from tblname").each do |col1, col2|
+      p col1, col2
+    end
   end
 
   job :my_job2, user: "ec2-user", schedule: "* * * * *", content: <<-EOS
