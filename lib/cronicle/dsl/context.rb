@@ -42,7 +42,12 @@ class Cronicle::DSL::Context
     end
 
     target.assert_valid_keys(:servers, :roles)
+    values = Cronicle::DSL::Context::Job.new(target, &block).result.values
 
-    @result.concat(Cronicle::DSL::Context::Job.new(target, &block).result.values)
+    @result.concat(values.empty? ? [{
+      :servers => Array(target[:servers]),
+      :roles => Array(target[:roles]),
+      :job => {}
+    }] : values)
   end
 end

@@ -138,6 +138,8 @@ class Cronicle::Client
       (selected_hots + dsl_hosts).uniq.each do |h|
         if hosts[h][job_user][job_name]
           log(:warn, "Job is duplicated", :color => :yellow, :host => h, :user => job_user, :job => job_name)
+        elsif job_name.nil?
+          hosts[h] = {}
         else
           hosts[h][job_user][job_name] = job_hash
         end
