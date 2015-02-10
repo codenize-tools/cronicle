@@ -133,7 +133,7 @@ server2
 
 Hosts definition file is not required.
 
-If you pass `--hosts` options, can be defined as follows in Jobfile:
+If you pass `--hosts` option, can be defined as follows in Jobfile:
 
 ```ruby
 on servers: /any_host/ do # use regexp
