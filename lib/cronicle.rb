@@ -15,8 +15,8 @@ require 'unindent'
 
 module Cronicle; end
 require 'cronicle/ext/hash_ext'
-require 'cronicle/ext/net-ssh_ext'
 require 'cronicle/ext/sshkit_ext'
+require 'cronicle/ext/net-ssh_ext'
 require 'cronicle/logger'
 require 'cronicle/utils'
 require 'cronicle/client'

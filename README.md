@@ -35,9 +35,11 @@ Options:
   -h, [--hosts=HOSTS]                  # Hosts definition file
   -r, [--target-roles=one two three]   # Target host role list
   -p, [--sudo-password=SUDO-PASSWORD]  # Sudo password
+      [--ssh-user=SSH-USER]            # SSH login user
       [--ask-pass], [--no-ask-pass]    # Ask sudo password
       [--dry-run], [--no-dry-run]      # Do not actually change
   -c, [--ssh-config=SSH-CONFIG]        # OpenSSH configuration file
+                                       # Default: ~/.ssh/config
       [--ssh-options=SSH-OPTIONS]      # SSH options (JSON)
       [--connection-timeout=N]         # SSH connection timeout
       [--concurrency=N]                # SSH concurrency
@@ -77,6 +79,12 @@ $ ssh your_hostname 'cat /var/lib/cronicle/libexec/ec2-user/my_job'
 #!/usr/bin/env ruby
 puts "hello"
 ```
+
+## Environment variables
+
+* CRONICLE_SSH_USER
+* CRONICLE_SSH_OPTIONS
+* CRONICLE_SSH_CONFIG
 
 ## Jobfile example
 
@@ -125,7 +133,7 @@ server2
 
 Hosts definition file is not required.
 
-If you pass `--hosts` options, can be defined as follows in Jobfile:
+If you pass `--hosts` option, can be defined as follows in Jobfile:
 
 ```ruby
 on servers: /any_host/ do # use regexp

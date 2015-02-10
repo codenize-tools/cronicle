@@ -25,6 +25,10 @@ class Cronicle::Client
     end
 
     parallel_each(jobs_by_host) do |host, jobs_by_user|
+      if @options[:ssh_user] and host !~ /@/
+        host = @options[:ssh_user] + '@' + host
+      end
+
       run_driver(host) do |driver|
         jobs_by_user.each do |user, jobs|
           driver.execute_job(user, jobs)
