@@ -47,8 +47,9 @@ class Cronicle::Client
   end
 
   def export_cron(host_list)
-    driver = Cronicle::Driver.new(host_list, @options)
-    Cronicle::Exporter.export(driver, @options)
+    run_driver(host_list) do |driver|
+      Cronicle::Exporter.export(driver, @options)
+    end
   end
 
   def walk_hosts(jobs_by_host, exported)
