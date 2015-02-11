@@ -120,7 +120,7 @@ def cronicle(*args)
   command = args.shift
   options = args.last.kind_of?(Hash) ? args.pop : {}
 
-  tempfile(`vagrant ssh-config`) do |ssh_config|
+  tempfile(vagrant_ssh_config) do |ssh_config|
     SSHKit::Backend::Netssh.configure do |ssh|
       ssh.ssh_options = {:config => ssh_config.path}
     end
@@ -132,6 +132,10 @@ def cronicle(*args)
       client.send(*args)
     end
   end
+end
+
+def vagrant_ssh_config
+  @vagrant_ssh_config ||= `vagrant ssh-config`
 end
 
 def cronicle_client(options = {})
