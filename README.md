@@ -115,6 +115,22 @@ on servers: :your_hostname do
 end
 ```
 
+### User variables
+
+```ruby
+on servers: :your_hostname do
+  job :my_job, user: "ec2-user", schedule: "* * * * *", locals: {foo: 'bar'} do
+    puts foo
+  end
+
+  job :my_job2, user: :root, schedule: "* * * * *", extra: "FOO=bar\nZOO=baz", content <<-SH
+    #!/bin/sh
+    echo $FOO
+    echo $ZOO
+  SH
+end
+```
+
 ## Hosts definition file
 
 Any of the following formats:
