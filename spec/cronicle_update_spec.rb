@@ -3,13 +3,13 @@ describe 'Cronicle::Client#apply (update)' do
     on TARGET_HOSTS do |ssh_options|
       user = ssh_options[:user]
 
-      set_crontab user, <<-CRON.unindent
+      set_crontab ssh_options[:host_name], user, <<-CRON.unindent
         FOO=bar
         ZOO=baz
         1 1 1 1 1 echo #{user} > /dev/null
       CRON
 
-      set_crontab :root, <<-CRON.unindent
+      set_crontab ssh_options[:host_name], :root, <<-CRON.unindent
         FOO=bar
         ZOO=baz
         1 1 1 1 1 echo root > /dev/null
@@ -149,9 +149,9 @@ ZOO=baz
     end
 
     it do
-      on :amazon_linux do
+      on :amazon_linux do |ssh_options|
         expect(get_uname).to match /amzn/
-        expect(get_crontabs).to eq amzn_crontab_orig
+        expect(get_crontabs(ssh_options[:host_name])).to eq amzn_crontab_orig
 
         expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.unindent
           #!/usr/bin/env ruby
@@ -170,9 +170,9 @@ ZOO=baz
         EOS
       end
 
-      on :ubuntu do
+      on :ubuntu do |ssh_options|
         expect(get_uname).to match /Ubuntu/
-        expect(get_crontabs).to eq ubuntu_crontab_orig
+        expect(get_crontabs(ssh_options[:host_name])).to eq ubuntu_crontab_orig
 
         expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.unindent
           #!/usr/bin/env ruby
@@ -193,9 +193,9 @@ ZOO=baz
 
       cronicle(:apply) { jobfile }
 
-      on :amazon_linux do
+      on :amazon_linux do |ssh_options|
         expect(get_uname).to match /amzn/
-        expect(get_crontabs).to eq amzn_crontab
+        expect(get_crontabs(ssh_options[:host_name])).to eq amzn_crontab
 
         expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.unindent
           #!/usr/bin/env ruby
@@ -214,9 +214,9 @@ ZOO=baz
         EOS
       end
 
-      on :ubuntu do
+      on :ubuntu do |ssh_options|
         expect(get_uname).to match /Ubuntu/
-        expect(get_crontabs).to eq ubuntu_crontab
+        expect(get_crontabs(ssh_options[:host_name])).to eq ubuntu_crontab
 
         expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.unindent
           #!/usr/bin/env ruby
@@ -275,9 +275,9 @@ ZOO=baz
     end
 
     it do
-      on :amazon_linux do
+      on :amazon_linux do |ssh_options|
         expect(get_uname).to match /amzn/
-        expect(get_crontabs).to eq amzn_crontab_orig
+        expect(get_crontabs(ssh_options[:host_name])).to eq amzn_crontab_orig
 
         expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.unindent
           #!/usr/bin/env ruby
@@ -296,9 +296,9 @@ ZOO=baz
         EOS
       end
 
-      on :ubuntu do
+      on :ubuntu do |ssh_options|
         expect(get_uname).to match /Ubuntu/
-        expect(get_crontabs).to eq ubuntu_crontab_orig
+        expect(get_crontabs(ssh_options[:host_name])).to eq ubuntu_crontab_orig
 
         expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.unindent
           #!/usr/bin/env ruby
@@ -319,9 +319,9 @@ ZOO=baz
 
       cronicle(:apply, dry_run: true) { jobfile }
 
-      on :amazon_linux do
+      on :amazon_linux do |ssh_options|
         expect(get_uname).to match /amzn/
-        expect(get_crontabs).to eq amzn_crontab_orig
+        expect(get_crontabs(ssh_options[:host_name])).to eq amzn_crontab_orig
 
         expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.unindent
           #!/usr/bin/env ruby
@@ -340,9 +340,9 @@ ZOO=baz
         EOS
       end
 
-      on :ubuntu do
+      on :ubuntu do |ssh_options|
         expect(get_uname).to match /Ubuntu/
-        expect(get_crontabs).to eq ubuntu_crontab_orig
+        expect(get_crontabs(ssh_options[:host_name])).to eq ubuntu_crontab_orig
 
         expect(get_file('/var/lib/cronicle/libexec/root/foo')).to eq <<-EOS.unindent
           #!/usr/bin/env ruby

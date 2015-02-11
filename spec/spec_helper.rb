@@ -6,14 +6,6 @@ require 'cronicle'
 
 String.disable_colorization = true
 
-def get_ssh_config(host)
-  Tempfile.open('', Dir.tmpdir) do |config|
-    config.write(`vagrant ssh-config #{host}`)
-    config.close
-    Net::SSH::Config.for(host, [config.path])
-  end
-end
-
 def specinfra_config_set_nil(key)
   Specinfra.configuration.instance_variable_set("@#{key}", nil)
   RSpec.configuration.send("#{key}=", nil)
@@ -24,14 +16,16 @@ CRON_DIRS = %w(
   /var/spool/cron
 )
 
-def get_cron_dir
-  CRON_DIRS.find do |dir|
+def get_cron_dir(host)
+  @cron_dirs = {}
+
+  @cron_dirs[host] ||= CRON_DIRS.find do |dir|
     Specinfra.backend.run_command("test -d #{dir}").exit_status.zero?
   end
 end
 
-def set_crontab(user, content)
-  cron_dir = get_cron_dir
+def set_crontab(host, user, content)
+  cron_dir = get_cron_dir(host)
 
   Tempfile.open('', Dir.tmpdir) do |fp|
     fp << content
@@ -40,8 +34,8 @@ def set_crontab(user, content)
   end
 end
 
-def get_crontabs
-  cron_dir = get_cron_dir
+def get_crontabs(host)
+  cron_dir = get_cron_dir(host)
   crontabs = Specinfra.backend.run_command("ls #{cron_dir}/*").stdout.strip.split(/\s+/)
 
   Hash[*crontabs.map {|crontab|
@@ -108,10 +102,9 @@ RSpec.configure do |config|
   end
 
   config.before(:each) do
-    on TARGET_HOSTS do
-      cron_dir = get_cron_dir
-      Specinfra.backend.run_command("rm -f #{cron_dir}/*")
-      Specinfra.backend.run_command("rm -rf /var/lib/cronicle/run")
+    on TARGET_HOSTS do |ssh_options|
+      cron_dir = get_cron_dir(ssh_options[:host_name])
+      Specinfra.backend.run_command("bash -c 'rm -f #{cron_dir}/* ; rm -rf /var/lib/cronicle/run'")
     end
   end
 end
