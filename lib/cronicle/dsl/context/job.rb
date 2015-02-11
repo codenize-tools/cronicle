@@ -30,12 +30,16 @@ class Cronicle::DSL::Context::Job
       raise ArgumentError, "Job `#{name}`: :user is required"
     end
 
-    opts.assert_valid_keys(:schedule, :user, :content, :bundle)
+    opts.assert_valid_keys(:schedule, :user, :content, :bundle, :locals, :extra)
 
     if opts[:content] and block
       raise ArgumentError, 'Can not pass :content and block to `job` method'
     elsif not opts[:content] and not block
       raise ArgumentError, "Job `#{name}`: :context or block is required"
+    end
+
+    unless opts[:locals].nil? or opts[:locals].kind_of?(Hash)
+      raise TypeError, "Job `#{name}`: :locals is wrong argument type (expected Hash)"
     end
 
     job_hash = @result[name][:job]
@@ -52,12 +56,20 @@ class Cronicle::DSL::Context::Job
       source = block.to_raw_source(:strip_enclosure => true).each_line.to_a
       source = source.shift + source.join.unindent
 
-      job_hash[:content] = <<-RUBY
-#!/usr/bin/env ruby
-#{source}
-      RUBY
+      job_hash[:content] = "#!/usr/bin/env ruby\n"
+
+      opts.fetch(:locals, {}).each do |name, value|
+        job_hash[:content] << "#{name} = #{value.inspect}\n"
+      end
+
+      job_hash[:content] << "#{source}\n"
     else
       job_hash[:content] = opts[:content].to_s.unindent
+    end
+
+    if opts[:extra]
+      index = (job_hash[:content] =~ /^[^#]/) || 0
+      job_hash[:content].insert(index, "#{opts[:extra]}\n")
     end
   end
 end
