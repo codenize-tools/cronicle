@@ -177,7 +177,7 @@ describe 'Cronicle::Client#exec' do
         end
 
         on servers: /ubuntu/ do
-          job :foo, user: :ubuntu, bundle: 'hashie' do
+          job :foo, user: :ubuntu, bundle: {hashie: {require: false}} do
             require 'hashie'
             mash = Hashie::Mash.new
             mash.name = "My Mash on ubuntu"
