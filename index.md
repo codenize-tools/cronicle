@@ -90,6 +90,21 @@ puts "hello"
 
 {% highlight ruby %}
 on servers: :your_hostname do
+  job :my_job, user: "ec2-user", schedule: "* * * * *" do
+    puts "hello"
+  end
+
+  job :my_job2, user: "ec2-user", schedule: "* * * * *", content: <<-EOS
+    #!/bin/sh
+    echo hello
+  EOS
+end
+{% endhighlight %}
+
+### User bundler
+
+{% highlight ruby %}
+on servers: :your_hostname do
   job :my_job, user: "ec2-user", schedule: "* * * * *", bundle: 'ruby-mysql' do
     require 'mysql'
     my = Mysql.connect('hostname', 'username', 'password', 'dbname')
@@ -97,11 +112,22 @@ on servers: :your_hostname do
       p col1, col2
     end
   end
+end
+{% endhighlight %}
 
-  job :my_job2, user: "ec2-user", schedule: "* * * * *", content: <<-EOS
+### User variables
+
+{% highlight ruby %}
+on servers: :your_hostname do
+  job :my_job, user: "ec2-user", schedule: "* * * * *", locals: {foo: 'bar'} do
+    puts foo
+  end
+
+  job :my_job2, user: :root, schedule: "* * * * *", extra: "FOO=bar\nZOO=baz", content <<-SH
     #!/bin/sh
-    echo hello
-  EOS
+    echo $FOO
+    echo $ZOO
+  SH
 end
 {% endhighlight %}
 
