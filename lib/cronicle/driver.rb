@@ -113,7 +113,7 @@ class Cronicle::Driver
       end
     end
 
-    if [:schedule, :content].any? {|k| job[k].chomp != script[k].chomp }
+    if [:schedule, :content].any? {|k| job[k].strip != script[k].strip }
       create_or_update_job(user, name, job, script)
     end
   end
