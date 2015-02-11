@@ -133,7 +133,7 @@ class SSHKit::Backend::Netssh
 
     bundle_gems.each do |gem_name, version|
       line = "gem '#{gem_name}'"
-      line << ", '#{version}'" if version
+      line << ", #{version.inspect}" if version
       sudo(:execute, :bash, '-c',
         Shellwords.shellescape(
           [:echo, Shellwords.shellescape(line), '>>', gemfile(user, name, temp_dir)].join(' ')
