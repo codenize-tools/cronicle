@@ -210,4 +210,43 @@ describe 'Cronicle::Client#exec' do
       EOS
     end
   end
+
+  context 'with locals/header' do
+    let(:jobfile) do
+      <<-RUBY.unindent
+        on servers: /amazon_linux/ do
+          job :foo, user: 'ec2-user', locals: {foo: 'BAR'} do
+            puts foo
+          end
+        end
+
+        on servers: /ubuntu/ do
+          job :foo, user: :ubuntu, header: 'FOO=100', content: <<-SH
+            #!/bin/sh
+            echo $FOO
+          SH
+        end
+      RUBY
+    end
+
+    before do
+      cronicle(:exec, :foo, logger: logger) { jobfile }
+    end
+
+    it do
+      expect(amzn_out).to eq <<-EOS.unindent
+        foo on amazon_linux/ec2-user> Execute job
+        foo on amazon_linux/ec2-user>\s
+        foo on amazon_linux/ec2-user> BAR
+      EOS
+    end
+
+    it do
+      expect(ubuntu_out).to eq <<-EOS.unindent
+        foo on ubuntu/ubuntu> Execute job
+        foo on ubuntu/ubuntu>\s
+        foo on ubuntu/ubuntu> 100
+      EOS
+    end
+  end
 end
