@@ -43,6 +43,10 @@ class Cronicle::Exporter
       if %r|\A#{Regexp.escape(libexec_dir)}/(?:[^/]+)/(.+)| =~ path
         name = $1
 
+        if libexec_contents[path]
+          libexec_contents[path].force_encoding('utf-8')
+        end
+
         scripts[name] = {
           :schedule => schedule,
           :path => path,
