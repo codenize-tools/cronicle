@@ -148,7 +148,7 @@ server2
 {% highlight javascript %}
 {
   "servers": {
-    "server1": ["web", "app"]
+    "server1": ["web", "app"],
     "server2": ["db"]
   }
 }
