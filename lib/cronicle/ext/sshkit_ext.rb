@@ -175,9 +175,20 @@ class SSHKit::Backend::Netssh
   )
 
   def bundler_path
-    @bundler_path ||= (BUNDLER_PATHS.find {|path|
+    @bundler_path ||= BUNDLER_PATHS.find {|path|
       execute(:test, '-f', path, :raise_on_non_zero_exit => false)
-    } || :bundle)
+    }
+
+    path = capture(:which, :bundle, '2>', '/dev/null', :raise_on_non_zero_exit => false) || ''
+    path.strip!
+
+    if path.empty?
+      log_for_cronicle(:error, 'cannot find bundler', :color => :red, :host => host.hostname)
+    else
+      @bundler_path = path
+    end
+
+    @bundler_path
   end
 
   def user_libexec_dir(user)
