@@ -15,6 +15,10 @@ class Cronicle::Client
     walk(file)
   end
 
+  def cleanup
+    walk(nil, :cleanup => true)
+  end
+
   def exec(file, name)
     name = name.to_s
     jobs = load_file(file)
@@ -39,9 +43,18 @@ class Cronicle::Client
 
   private
 
-  def walk(file)
-    jobs = load_file(file)
-    jobs_by_host = select_host(jobs)
+  def walk(file, opts = {})
+    if opts[:cleanup]
+      jobs_by_host = {}
+
+      @host_list.all.each do |host|
+        jobs_by_host[host] = {}
+      end
+    else
+      jobs = load_file(file)
+      jobs_by_host = select_host(jobs)
+    end
+
     exported = export_cron(jobs_by_host.keys)
     walk_hosts(jobs_by_host, exported)
   end

@@ -45,6 +45,14 @@ class Cronicle::CLI < Thor
     end
   end
 
+  desc 'cleanup', 'Clean up cron jobs on remote hosts'
+  def cleanup
+    with_logging do
+      set_ssh_options
+      client.cleanup
+    end
+  end
+
   private
 
   def with_logging
