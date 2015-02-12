@@ -279,17 +279,12 @@ ZOO=baz
 "FOO=bar
 ZOO=baz
 1 1 1 1 1 echo root > /dev/null
-1 2 * * *\tcd /var/lib/cronicle/run/root/foo && /usr/local/bin/bundle exec /var/lib/cronicle/libexec/root/foo 2>&1 | logger -t cronicle/root/foo
 "
       }
     end
 
     let(:amzn_gemfile) do
       {
-        "/var/lib/cronicle/run/root/foo/Gemfile" =>
-"source 'https://rubygems.org'
-gem 'ruby-mysql'
-"
       }
     end
 
@@ -299,7 +294,6 @@ gem 'ruby-mysql'
 "FOO=bar
 ZOO=baz
 1 1 1 1 1 echo root > /dev/null
-1 2 * * *\tcd /var/lib/cronicle/run/root/foo && /usr/local/bin/bundle exec /var/lib/cronicle/libexec/root/foo 2>&1 | logger -t cronicle/root/foo
 ",
         "/var/spool/cron/crontabs/ubuntu" =>
 "FOO=bar
@@ -311,10 +305,6 @@ ZOO=baz
 
     let(:ubuntu_gemfile) do
       {
-        "/var/lib/cronicle/run/root/foo/Gemfile" =>
-"source 'https://rubygems.org'
-gem 'ruby-mysql'
-"
       }
     end
 
@@ -349,7 +339,10 @@ gem 'ruby-mysql'
         expect(get_gemfiles).to eq ubuntu_gemfile_orig
       end
 
-      cronicle(:apply) { '' }
+      cronicle(:apply) { <<-EOS }
+        on servers: /.*/ do
+        end
+      EOS
 
       on :amazon_linux do
         expect(get_uname).to match /amzn/
