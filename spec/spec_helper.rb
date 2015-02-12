@@ -126,9 +126,15 @@ def cronicle(*args)
     end
 
     client = cronicle_client(options)
+    content = block_given? ? yield : nil
 
-    tempfile(yield) do |f|
-      args = [command, f.path, args].flatten
+    if content
+      tempfile(yield) do |f|
+        args = [command, f.path, args].flatten
+        client.send(*args)
+      end
+    else
+      args = [command, args].flatten
       client.send(*args)
     end
   end
