@@ -26,6 +26,7 @@ Or install it yourself as:
 ```
 Commands:
   cronicle apply           # Apply cron jobs to remote hosts
+  cronicle cleanup         # Clean up cron jobs on remote hosts
   cronicle exec JOB_NAME   # Execute a job on remote hosts
   cronicle help [COMMAND]  # Describe available commands or one specific command
 
