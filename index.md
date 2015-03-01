@@ -102,7 +102,7 @@ on servers: :your_hostname do
 end
 {% endhighlight %}
 
-### User bundler
+### Use bundler
 
 {% highlight ruby %}
 on servers: :your_hostname do
@@ -116,7 +116,7 @@ on servers: :your_hostname do
 end
 {% endhighlight %}
 
-### User variables
+### Use variables
 
 {% highlight ruby %}
 on servers: :your_hostname do
