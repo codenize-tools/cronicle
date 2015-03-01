@@ -102,7 +102,7 @@ on servers: :your_hostname do
 end
 ```
 
-### User bundler
+### Use bundler
 
 ```ruby
 on servers: :your_hostname do
