@@ -116,7 +116,7 @@ on servers: :your_hostname do
 end
 ```
 
-### User variables
+### Use variables
 
 ```ruby
 on servers: :your_hostname do
