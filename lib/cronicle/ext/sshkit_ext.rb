@@ -4,6 +4,17 @@ class SSHKit::Backend::Netssh
   SUDO_PASSWORD_KEY = :'__cronicle_sudo_password__'
   SUDO_PROMPT = '__cronicle_sudo_prompt__'
 
+  alias _execute_orig _execute
+
+  def _execute(*args)
+    begin
+      _execute_orig(*args)
+    rescue => e
+      log_for_cronicle(:error, args.join(' '), :color => :red)
+      raise e
+    end
+  end
+
   def sudo(command, *args)
     opts = args.last.kind_of?(Hash) ? args.pop : {}
 
