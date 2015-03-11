@@ -55,10 +55,13 @@ describe 'Cronicle::Client#exec' do
         foo on ubuntu/root> Execute job
         foo on ubuntu/root>\s
         foo on ubuntu/root> Linux
+        foo on ubuntu/root>\s
         foo on ubuntu/root> root
+        foo on ubuntu/root>\s
         bar on ubuntu/root> Execute job
         bar on ubuntu/root>\s
         bar on ubuntu/root> hello
+        foo on ubuntu/root>\s
       EOS
     end
   end
@@ -139,7 +142,9 @@ describe 'Cronicle::Client#exec' do
         foo on ubuntu/ubuntu> Execute job
         foo on ubuntu/ubuntu>\s
         foo on ubuntu/ubuntu> Linux
+        foo on ubuntu/ubuntu>\s
         foo on ubuntu/ubuntu> ubuntu
+        foo on ubuntu/ubuntu>\s
       EOS
     end
   end
@@ -206,7 +211,9 @@ describe 'Cronicle::Client#exec' do
         foo on ubuntu/ubuntu> Execute job
         foo on ubuntu/ubuntu>\s
         foo on ubuntu/ubuntu> "My Mash on ubuntu"
+        foo on ubuntu/ubuntu>\s
         foo on ubuntu/ubuntu> true
+        foo on ubuntu/ubuntu>\s
       EOS
     end
   end
@@ -238,6 +245,7 @@ describe 'Cronicle::Client#exec' do
         foo on amazon_linux/ec2-user> Execute job
         foo on amazon_linux/ec2-user>\s
         foo on amazon_linux/ec2-user> BAR
+        foo on amazon_linux/ec2-user>\s
       EOS
     end
 
@@ -246,6 +254,7 @@ describe 'Cronicle::Client#exec' do
         foo on ubuntu/ubuntu> Execute job
         foo on ubuntu/ubuntu>\s
         foo on ubuntu/ubuntu> 100
+        foo on ubuntu/ubuntu>\s
       EOS
     end
   end
