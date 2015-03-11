@@ -54,36 +54,24 @@ class Cronicle::Driver
           end
 
           upload_script(temp_dir, name, job[:content]) do |temp_script|
-            exec_opts = {:user => user, :raise_on_non_zero_exit => false}
-            command = nil
+            host_user_job = {:host => host.hostname, :user => user, :job => name}
+
+            sniffer = proc do |obj|
+              out = obj.kind_of?(SSHKit::Command) ? obj.stdout : obj.to_s
+              log_for_cronicle(:info, out, host_user_job)
+            end
+
+            exec_opts = {:user => user, :raise_on_non_zero_exit => false, :sniffer => sniffer}
 
             if job[:bundle]
               mkgemfile(user, name, job[:bundle], temp_dir)
               bundle(user, name, temp_dir)
 
               with_bundle(user, name, temp_dir) do
-                command = sudo(:_execute, bundler_path, :exec, temp_script, exec_opts)
+                sudo(:_execute, bundler_path, :exec, temp_script, exec_opts)
               end
             else
-              command = sudo(:_execute, temp_script, exec_opts)
-            end
-
-            out = command.full_stdout
-            Cronicle::Utils.remove_prompt!(out)
-            host_user_job = {:host => host.hostname, :user => user, :job => name}
-
-            put_log = proc do |level, opts|
-              opts ||= {}
-
-              out.each_line do |line|
-                log_for_cronicle(:info, line.strip, opts.merge(host_user_job))
-              end
-            end
-
-            if command.exit_status.zero?
-              put_log.call(:info)
-            else
-              put_log.call(:error, :color => :red)
+              sudo(:_execute, temp_script, exec_opts)
             end
           end
         end

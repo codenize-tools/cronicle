@@ -63,31 +63,6 @@ class Cronicle::Logger < ::Logger
       Cronicle::Logger.log(level, message, opts)
     end
   end
-
-  class SSHKitIO
-    def initialize(io = $stdout)
-      @io = io
-    end
-
-    def <<(obj)
-      @io << mask_password(obj)
-    end
-
-    private
-
-    MASK_REGEXP = /\becho\s+([^|]+)\s+\|\s+sudo\s+-S\s+/
-    MASK = 'XXXXXXXX'
-
-    def mask_password(obj)
-      if obj.kind_of?(String) and obj =~ MASK_REGEXP
-        password = $1
-        obj.sub(password, MASK)
-      else
-        obj
-      end
-    end
-  end
 end
 
-SSHKit.config.output = SSHKit::Formatter::Pretty.new(Cronicle::Logger::SSHKitIO.new)
 SSHKit.config.output_verbosity = :warn

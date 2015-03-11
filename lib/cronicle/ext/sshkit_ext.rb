@@ -6,12 +6,27 @@ class SSHKit::Backend::Netssh
 
   alias _execute_orig _execute
 
+  def output
+    @output ||= SSHKit.config.output
+  end
+
   def _execute(*args)
+    options = args.last.kind_of?(Hash) ? args.last : {}
+    orig_output = output
+
     begin
+      if options[:sniffer]
+        @output = Cronicle::LogSniffer.new(orig_output) do |obj|
+          options[:sniffer].call(obj)
+        end
+      end
+
       _execute_orig(*args)
     rescue => e
       log_for_cronicle(:error, args.join(' '), :color => :red)
       raise e
+    ensure
+      @output = orig_output
     end
   end
 
@@ -22,9 +37,7 @@ class SSHKit::Backend::Netssh
       with_sudo = [:sudo, '-p', SUDO_PROMPT, '-S']
       with_sudo << :sudo << '-u' << opts[:user] if opts[:user]
       with_sudo.concat(args)
-
-      raise_on_non_zero_exit = opts.fetch(:raise_on_non_zero_exit, true)
-      send(command, *with_sudo, :raise_on_non_zero_exit => raise_on_non_zero_exit)
+      send(command, *with_sudo, opts)
     end
 
     Cronicle::Utils.remove_prompt!(retval) if retval.kind_of?(String)

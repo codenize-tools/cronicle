@@ -4,7 +4,7 @@ class Cronicle::CLI < Thor
   class_option 'file',               :aliases => '-f', :desc => 'Job definition file',        :default => 'Jobfile'
   class_option 'hosts',              :aliases => '-h', :desc => 'Hosts definition file'
   class_option 'target-roles',       :aliases => '-r', :desc => 'Target host role list',      :type => :array
-  class_option 'sudo-password',      :aliases => '-p', :desc => 'Sudo password'
+  class_option 'sudo-password',      :aliases => '-p', :desc => 'Sudo password',              :default => ENV['CRONICLE_SUDO_PASSWORD']
   class_option 'ssh-user',                             :desc => 'SSH login user',             :default => ENV['CRONICLE_SSH_USER']
   class_option 'ask-pass',                             :desc => 'Ask sudo password',          :type => :boolean, :default => false
   class_option 'dry-run',                              :desc => 'Do not actually change',     :type => :boolean, :default => false
