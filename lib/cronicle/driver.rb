@@ -58,7 +58,10 @@ class Cronicle::Driver
 
             sniffer = proc do |obj|
               out = obj.kind_of?(SSHKit::Command) ? obj.stdout : obj.to_s
-              log_for_cronicle(:info, out, host_user_job)
+
+              out.each_line do |line|
+                log_for_cronicle(:info, line, host_user_job)
+              end
             end
 
             exec_opts = {:user => user, :raise_on_non_zero_exit => false, :sniffer => sniffer}
