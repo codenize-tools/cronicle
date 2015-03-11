@@ -61,7 +61,7 @@ describe 'Cronicle::Client#exec' do
         bar on ubuntu/root> Execute job
         bar on ubuntu/root>\s
         bar on ubuntu/root> hello
-        foo on ubuntu/root>\s
+        bar on ubuntu/root>\s
       EOS
     end
   end
