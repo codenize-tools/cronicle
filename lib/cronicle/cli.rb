@@ -14,6 +14,7 @@ class Cronicle::CLI < Thor
   class_option 'concurrency',                          :desc => 'SSH concurrency',            :type => :numeric, :default => Cronicle::Client::DEFAULTS[:concurrency]
   class_option 'var-dir',                              :desc => 'Cronicle var dir path',      :default => Cronicle::Client::DEFAULTS[:var_dir]
   class_option 'verbose',            :aliases => '-v', :desc => 'Verbose mode',               :type => :boolean, :default => false
+  class_option 'require',                              :desc => 'Load ruby libraries',        :type => :array,   :default => []
   class_option 'debug',                                :desc => 'Debug mode',                 :type => :boolean, :default => false
   class_option 'color',                                :desc => 'Colorize log',               :type => :boolean, :default => true
 
@@ -27,6 +28,8 @@ class Cronicle::CLI < Thor
     if not $stdin.tty? or not options['color']
       String.disable_colorization = true
     end
+
+    options['require'].each {|lib| require(lib) }
   end
 
   desc 'exec JOB_NAME', 'Execute a job on remote hosts'
